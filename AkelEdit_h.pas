@@ -6986,8 +6986,34 @@ function AEC_IsHighSurrogate(c: WideChar): Boolean; inline;
 function AEC_IsLowSurrogate(c: WideChar): Boolean; inline;
 
 function AEC_CopyChar(wszTarget: PWideChar; dwTargetSize: DWORD; const wpSource: PWideChar): Integer;
-
+function AEC_IndexInc(var ciChar: TAECHARINDEX): Integer;
+//int AEC_IndexDec(AECHARINDEX *ciChar)
+function AEC_IndexLen(const ciChar: TAECHARINDEX): Integer;
 function AEC_IndexCompare(const ciChar1, ciChar2: TAECHARINDEX): Integer;
+//int AEC_IndexCompareEx(const AECHARINDEX *ciChar1, const AECHARINDEX *ciChar2)
+function AEC_NextLine(var ciChar: TAECHARINDEX): PAELINEDATA;
+//AELINEDATA* AEC_PrevLine(AECHARINDEX *ciChar)
+//AELINEDATA* AEC_NextLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+//AELINEDATA* AEC_PrevLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+function AEC_NextChar(var ciChar: TAECHARINDEX): PAELINEDATA;
+//AELINEDATA* AEC_PrevChar(AECHARINDEX *ciChar)
+//AELINEDATA* AEC_NextCharEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+//AELINEDATA* AEC_PrevCharEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+//AELINEDATA* AEC_NextCharInLine(AECHARINDEX *ciChar)
+//AELINEDATA* AEC_PrevCharInLine(AECHARINDEX *ciChar)
+//AELINEDATA* AEC_NextCharInLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+//AELINEDATA* AEC_PrevCharInLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+//AELINEDATA* AEC_ValidCharInLine(AECHARINDEX *ciChar)
+//int AEC_WrapLineBegin(AECHARINDEX *ciChar)
+//int AEC_WrapLineEnd(AECHARINDEX *ciChar)
+//int AEC_WrapLineBeginEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+//int AEC_WrapLineEndEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+//int AEC_CharAtIndex(const AECHARINDEX *ciChar)
+//BOOL AEC_IsCharInSelection(const AECHARINDEX *ciChar)
+//BOOL AEC_IsFirstCharInLine(const AECHARINDEX *ciChar)
+//BOOL AEC_IsLastCharInLine(const AECHARINDEX *ciChar)
+//AEFOLD* AEC_NextFold(AEFOLD *lpFold, BOOL bRecursive)
+//AEFOLD* AEC_PrevFold(AEFOLD *lpFold, BOOL bRecursive)
 
 implementation
 
@@ -7010,6 +7036,7 @@ end;
 
 function AEC_CopyChar(wszTarget: PWideChar; dwTargetSize: DWORD; const wpSource: PWideChar): Integer;
 begin
+  Result := 0;
   if AEC_IsSurrogate(wpSource^) then
   begin
     if dwTargetSize >= 2 then
@@ -7021,7 +7048,7 @@ begin
           wszTarget^ := wpSource^;
           (wszTarget + 1)^ := (wpSource + 1)^;
         end;
-        Exit(2);
+        Result := 2;
       end;
     end;
   end
@@ -7029,42 +7056,25 @@ begin
   begin
     if wszTarget <> nil then
       wszTarget^ := wpSource^;
-    Exit(1);
+    Result := 1;
   end;
-
-  Exit(0);
 end;
 
-
-function AEC_IndexCompare(const ciChar1, ciChar2: TAECHARINDEX): Integer;
+function AEC_IndexInc(var ciChar: TAECHARINDEX): Integer;
 begin
-  if (ciChar1.nLine = ciChar2.nLine) and
-     (ciChar1.nCharInLine = ciChar2.nCharInLine) then
-     Exit(0);
-  if (ciChar1.nLine < ciChar2.nLine) or
-     ((ciChar1.nLine = ciChar2.nLine) and (ciChar1.nCharInLine < ciChar2.nCharInLine)) then
-     Exit(-1);
-  // else
-  Exit(1);
-end;
+  if (ciChar.nCharInLine >= 0) and (ciChar.nCharInLine + 1 < ciChar.lpLine.nLineLen) then
+  begin
+    if AEC_IsHighSurrogate(ciChar.lpLine.wpLine[ciChar.nCharInLine]) and
+       AEC_IsLowSurrogate(ciChar.lpLine.wpLine[ciChar.nCharInLine + 1]) then
+         Result := 2;
+  end
+  else
+    Result := 1;
 
+  Inc(ciChar.nCharInLine, Result);
+end;
 
 (*
-int AEC_IndexInc(AECHARINDEX *ciChar)
-{
-  if (ciChar->nCharInLine >= 0 &&
-      ciChar->nCharInLine + 1 < ciChar->lpLine->nLineLen)
-  {
-    if (AEC_IsHighSurrogate(ciChar->lpLine->wpLine[ciChar->nCharInLine]) &&
-        AEC_IsLowSurrogate(ciChar->lpLine->wpLine[ciChar->nCharInLine + 1]))
-    {
-      ciChar->nCharInLine+=2;
-      return 2;
-    }
-  }
-  ++ciChar->nCharInLine;
-  return 1;
-}
 
 int AEC_IndexDec(AECHARINDEX *ciChar)
 {
@@ -7082,35 +7092,31 @@ int AEC_IndexDec(AECHARINDEX *ciChar)
   return 1;
 }
 
-int AEC_IndexLen(AECHARINDEX *ciChar)
-{
-  if (ciChar->nCharInLine >= 0 &&
-      ciChar->nCharInLine + 1 < ciChar->lpLine->nLineLen)
-  {
-    if (AEC_IsHighSurrogate(ciChar->lpLine->wpLine[ciChar->nCharInLine]) &&
-        AEC_IsLowSurrogate(ciChar->lpLine->wpLine[ciChar->nCharInLine + 1]))
-    {
-      return 2;
-    }
-  }
-  return 1;
-}
+*)
 
-int AEC_IndexCompare(const AECHARINDEX *ciChar1, const AECHARINDEX *ciChar2)
-{
-  if (ciChar1->nLine == ciChar2->nLine &&
-      ciChar1->nCharInLine == ciChar2->nCharInLine)
-  {
-    return 0;
-  }
-  if ((ciChar1->nLine < ciChar2->nLine) ||
-      (ciChar1->nLine == ciChar2->nLine &&
-       ciChar1->nCharInLine < ciChar2->nCharInLine))
-  {
-    return -1;
-  }
-  return 1;
-}
+function AEC_IndexLen(const ciChar: TAECHARINDEX): Integer;
+begin
+  Result := 1;
+  if (ciChar.nCharInLine >= 0) and (ciChar.nCharInLine + 1 < ciChar.lpLine.nLineLen) then
+    if AEC_IsHighSurrogate(ciChar.lpLine.wpLine[ciChar.nCharInLine]) and
+       AEC_IsLowSurrogate(ciChar.lpLine.wpLine[ciChar.nCharInLine + 1]) then
+         Result := 2;
+end;
+
+function AEC_IndexCompare(const ciChar1, ciChar2: TAECHARINDEX): Integer;
+begin
+  if (ciChar1.nLine = ciChar2.nLine) and
+     (ciChar1.nCharInLine = ciChar2.nCharInLine) then
+     Result := 0
+  else
+  if (ciChar1.nLine < ciChar2.nLine) or
+     ((ciChar1.nLine = ciChar2.nLine) and (ciChar1.nCharInLine < ciChar2.nCharInLine)) then
+    Result := -1
+  else
+    Result := 1;
+end;
+
+(*
 
 int AEC_IndexCompareEx(const AECHARINDEX *ciChar1, const AECHARINDEX *ciChar2)
 {
@@ -7137,16 +7143,21 @@ int AEC_IndexCompareEx(const AECHARINDEX *ciChar1, const AECHARINDEX *ciChar2)
   return 1;
 }
 
-AELINEDATA* AEC_NextLine(AECHARINDEX *ciChar)
-{
-  if (ciChar->lpLine)
-  {
-    ciChar->nLine+=1;
-    ciChar->lpLine=ciChar->lpLine->next;
-    ciChar->nCharInLine=0;
-  }
-  return ciChar->lpLine;
-}
+*)
+
+function AEC_NextLine(var ciChar: TAECHARINDEX): PAELINEDATA;
+begin
+  if ciChar.lpLine <> nil then
+  begin
+    Inc(ciChar.nLine);
+    ciChar.lpLine := ciChar.lpLine.next;
+    ciChar.nCharInLine :=0;
+  end;
+  Result := ciChar.lpLine;
+end;
+
+
+(*
 
 AELINEDATA* AEC_PrevLine(AECHARINDEX *ciChar)
 {
@@ -7193,21 +7204,19 @@ AELINEDATA* AEC_PrevLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
     return NULL;
   }
 }
+*)
 
-AELINEDATA* AEC_NextChar(AECHARINDEX *ciChar)
-{
+function AEC_NextChar(var ciChar: TAECHARINDEX): PAELINEDATA;
+begin
   AEC_IndexInc(ciChar);
-
-  if (ciChar->nCharInLine >= ciChar->lpLine->nLineLen)
-  {
-    if (ciChar->nCharInLine > ciChar->lpLine->nLineLen ||
-        ciChar->lpLine->nLineBreak == AELB_WRAP)
-    {
+  if ciChar.nCharInLine >= ciChar.lpLine.nLineLen then
+    if (ciChar.nCharInLine > ciChar.lpLine.nLineLen) or
+       (ciChar.lpLine.nLineBreak = AELB_WRAP) then
       AEC_NextLine(ciChar);
-    }
-  }
-  return ciChar->lpLine;
-}
+  Result := ciChar.lpLine;
+end;
+
+(*
 
 AELINEDATA* AEC_PrevChar(AECHARINDEX *ciChar)
 {
