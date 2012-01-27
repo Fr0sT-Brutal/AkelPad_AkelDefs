@@ -9,8 +9,8 @@
 
 ===========      Akel API version : 1.6.0.6     ===========
 ===========           Edited by Fr0sT           ===========
-= Tested on RAD Studio 2010 but should work on earlier    =
-= versions also.                                          =
+= Tested on RAD Studio 2010 but compiles on D7 and should =
+= work on other versions also.                            =
 
 **************************************************************************)
 
@@ -1193,6 +1193,21 @@ const DWLP_MSGRESULT = 0;
 type
   PHWND = ^HWND;
   {$EXTERNALSYM PHWND}
+  // Fr0sT: these WinAPI types aren't defined in RTL until D2009 (?)
+  {$IF CompilerVersion < 20}
+    INT_PTR = Integer;
+    {$EXTERNALSYM INT_PTR}
+    LONG_PTR = Longint;
+    {$EXTERNALSYM LONG_PTR}
+    UINT_PTR = Cardinal;
+    {$EXTERNALSYM UINT_PTR}
+    ULONG_PTR = LongWord;
+    {$EXTERNALSYM ULONG_PTR}
+    DWORD_PTR = ULONG_PTR;
+    {$EXTERNALSYM DWORD_PTR}
+    HANDLE_PTR = type LongWord;
+    {$EXTERNALSYM HANDLE_PTR}
+  {$IFEND}
 
 //// Structures
 
@@ -3148,7 +3163,7 @@ const AKD_EXGETTEXTRANGEA = (WM_USER + 403);
 const AKD_EXGETTEXTRANGEW = (WM_USER + 404);
 {$EXTERNALSYM AKD_EXGETTEXTRANGEW}
 
-{$REGION 'Message manual'}
+{$IF CompilerVersion > 20}{$REGION 'Message manual'}{$IFEND}
 
 (*
 
@@ -5765,7 +5780,7 @@ Example (bOldWindows == FALSE):
 
 *)
 
-{$ENDREGION}
+{$IF CompilerVersion > 20}{$ENDREGION}{$IFEND}
 
 //// AkelPad WM_COPYDATA messages
 

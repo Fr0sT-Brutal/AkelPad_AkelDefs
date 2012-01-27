@@ -7,6 +7,10 @@
 ** Blogs: http://delphiprogrammingwithalgun.blogspot.com/
 ** Copyright (c) 2005, 2011 Ural Gunaydin (a.k.a. Al Gun)
 
+===========           Edited by Fr0sT           ===========
+= Tested on RAD Studio 2010 but compiles on D7 and should =
+= work on other versions also.                            =
+
 **************************************************************************)
 
 unit AkelEdit_h;
@@ -51,23 +55,17 @@ const AECLASS_RICHEDIT = 2;
 const ES_HEAP_SERIALIZE = $00008000;  //Mutual exclusion will be used when the heap functions allocate and free memory from window heap. Serialization of heap access allows two or more threads to simultaneously allocate and free memory from the same heap.
 {$EXTERNALSYM ES_HEAP_SERIALIZE}      //Compatibility: define same as ES_SAVESEL.
 
-{}(*
-#define AES_WORDDELIMITERSW     L" \t\n'`\"\\|[](){}<>,.;:+-=~!@#$%^&*/?"
-#define AES_WRAPDELIMITERSW     L" \t"
-#define AES_URLLEFTDELIMITERSW  L" \t\n'`\"(<{[="
-#define AES_URLRIGHTDELIMITERSW L" \t\n'`\")>}]"
-#define AES_URLPREFIXESW        L"http:\0https:\0www.\0ftp:\0file:\0mailto:\0\0"
-
-
-
-const AES_WRAPDELIMITERSW : WideString = '  t';
+const AES_WORDDELIMITERSW : WideString = ' '#9#13#10'''`\"\\|[](){}<>,.;:+-=~!@#$%^&*/?';
+{$EXTERNALSYM AES_WORDDELIMITERSW}
+const AES_WRAPDELIMITERSW : WideString = ' '#9;
 {$EXTERNALSYM AES_WRAPDELIMITERSW}
- of constAES_URLLEFTDELIMITERSW '  t n'` '(<begin : array[0..-1='
-const AES_URLRIGHTDELIMITERSW = '  t n'` '(> end;]';
+const AES_URLLEFTDELIMITERSW : WideString = ' '#9#13#10'''`\"(<{[=';
+{$EXTERNALSYM AES_URLLEFTDELIMITERSW}
+const AES_URLRIGHTDELIMITERSW  : WideString = ' '#9#13#10'''`\")>}]';
 {$EXTERNALSYM AES_URLRIGHTDELIMITERSW}
-const AES_URLPREFIXESW = 'http: 0https: 0www. 0ftp: 0file: 0mailto: 0 0';
+const AES_URLPREFIXESW : WideString = 'http:'#0'https:'#0'www.'#0'ftp:'#0'file:'#0'mailto:'#0#0;
 {$EXTERNALSYM AES_URLPREFIXESW}
-*)
+
 
 //AEM_SETEVENTMASK flags
 const AENM_SCROLL = $00000001;  //Sends AEN_HSCROLL and AEN_VSCROLL notifications.
@@ -970,7 +968,7 @@ const WC_NO_BEST_FIT_CHARS = $00000400;
 const GT_SELECTION = $0002;
 }
 
-{}
+
 const EM_SHOWSCROLLBAR = (WM_USER + 96);
 {$EXTERNALSYM EM_SHOWSCROLLBAR}
 const EM_GETSCROLLPOS = (WM_USER + 221);
@@ -1321,7 +1319,7 @@ type
     dwBufferMax: UINT_PTR;       //[in]  Specifies the maximum number of characters to copy to the buffer, including the NULL character.
     nNewLine: Integer;           //[in]  See AELB_* defines.
     nCodePage: Integer;          //[in]  Ignored. Code page is always 1200 (UTF-16 LE).
-    lpDefaultChar: PChar;        //[in]  Ignored.
+    lpDefaultChar: PWideChar;    //[in]  Ignored.
     lpUsedDefChar: PBOOL;        //[in]  Ignored.
     bFillSpaces: BOOL;           //[in]  If bColumnSel is TRUE, fill empties with spaces.
   end;
@@ -1478,169 +1476,170 @@ type
 
 type
   PAEDELIMITEMA = ^TAEDELIMITEMA;
-	_AEDELIMITEMA = record
-		next: PAEDELIMITEMA;
-		prev: PAEDELIMITEMA;
-		nIndex: Integer;            //Position of the element if positive inserts to begin of stack if negative to end.
-		pDelimiter: PAnsiChar;      //Delimiter string.
-		nDelimiterLen: Integer;     //Delimiter string length.
-		dwFlags: DWORD;             //See AEHLF_* defines.
-		dwFontStyle: DWORD;         //See AEHLS_* defines.
-		crText: COLORREF;           //Delimiter text color. If -1, then don't set.
-		crBk: COLORREF;             //Delimiter background color. If -1, then don't set.
-	end;
-	TAEDELIMITEMA = _AEDELIMITEMA;
-	{$EXTERNALSYM TAEDELIMITEMA}
+  _AEDELIMITEMA = record
+    next: PAEDELIMITEMA;
+    prev: PAEDELIMITEMA;
+    nIndex: Integer;            //Position of the element if positive inserts to begin of stack if negative to end.
+    pDelimiter: PAnsiChar;      //Delimiter string.
+    nDelimiterLen: Integer;     //Delimiter string length.
+    dwFlags: DWORD;             //See AEHLF_* defines.
+    dwFontStyle: DWORD;         //See AEHLS_* defines.
+    crText: COLORREF;           //Delimiter text color. If -1, then don't set.
+    crBk: COLORREF;             //Delimiter background color. If -1, then don't set.
+  end;
+  TAEDELIMITEMA = _AEDELIMITEMA;
+  {$EXTERNALSYM TAEDELIMITEMA}
 
 
 type
   PAEDELIMITEMW = ^TAEDELIMITEMW;
-	_AEDELIMITEMW = record
-		next: PAEDELIMITEMW;
-		prev: PAEDELIMITEMW;
-		nIndex: Integer;            //Position of the element if positive inserts to begin of stack if negative to end.
-		pDelimiter: PWideChar;      //Delimiter string.
-		nDelimiterLen: Integer;     //Delimiter string length.
-		dwFlags: DWORD;             //See AEHLF_* defines.
-		dwFontStyle: DWORD;         //See AEHLS_* defines.
-		crText: COLORREF;           //Delimiter text color. If -1, then don't set.
-		crBk: COLORREF;             //Delimiter background color. If -1, then don't set.
-	end;
-	TAEDELIMITEMW = _AEDELIMITEMW;
-	{$EXTERNALSYM TAEDELIMITEMW}
+  _AEDELIMITEMW = record
+    next: PAEDELIMITEMW;
+    prev: PAEDELIMITEMW;
+    nIndex: Integer;            //Position of the element if positive inserts to begin of stack if negative to end.
+    pDelimiter: PWideChar;      //Delimiter string.
+    nDelimiterLen: Integer;     //Delimiter string length.
+    dwFlags: DWORD;             //See AEHLF_* defines.
+    dwFontStyle: DWORD;         //See AEHLS_* defines.
+    crText: COLORREF;           //Delimiter text color. If -1, then don't set.
+    crBk: COLORREF;             //Delimiter background color. If -1, then don't set.
+  end;
+  TAEDELIMITEMW = _AEDELIMITEMW;
+  {$EXTERNALSYM TAEDELIMITEMW}
 
 
 type
   PAEWORDITEMA = ^TAEWORDITEMA;
-	_AEWORDITEMA = record
-		next: PAEWORDITEMA;
-		prev: PAEWORDITEMA;
-		nIndex: Integer;            //Reserved. Word items are automatically sorted.
-		pWord: PAnsiChar;           //Word string.
-		nWordLen: Integer;          //Word string length.
-		dwFlags: DWORD;             //See AEHLF_* defines.
-		dwFontStyle: DWORD;         //See AEHLS_* defines.
-		crText: COLORREF;           //Word text color. If -1, then don't set.
-		crBk: COLORREF;             //Word background color. If -1, then don't set.
-	end;
-	TAEWORDITEMA = _AEWORDITEMA;
-	{$EXTERNALSYM TAEWORDITEMA}
+  _AEWORDITEMA = record
+    next: PAEWORDITEMA;
+    prev: PAEWORDITEMA;
+    nIndex: Integer;            //Reserved. Word items are automatically sorted.
+    pWord: PAnsiChar;           //Word string.
+    nWordLen: Integer;          //Word string length.
+    dwFlags: DWORD;             //See AEHLF_* defines.
+    dwFontStyle: DWORD;         //See AEHLS_* defines.
+    crText: COLORREF;           //Word text color. If -1, then don't set.
+    crBk: COLORREF;             //Word background color. If -1, then don't set.
+  end;
+  TAEWORDITEMA = _AEWORDITEMA;
+  {$EXTERNALSYM TAEWORDITEMA}
 
 
 type
   PAEWORDITEMW = ^TAEWORDITEMW;
-	_AEWORDITEMW = record
-		next: PAEWORDITEMW;
-		prev: PAEWORDITEMW;
-		nIndex: Integer;            //Reserved. Word items are automatically sorted.
-		pWord: PWideChar;           //Word string.
-		nWordLen: Integer;          //Word string length.
-		dwFlags: DWORD;             //See AEHLF_* defines.
-		dwFontStyle: DWORD;         //See AEHLS_* defines.
-		crText: COLORREF;           //Word text color. If -1, then don't set.
-		crBk: COLORREF;             //Word background color. If -1, then don't set.
-	end;
-	TAEWORDITEMW = _AEWORDITEMW;
-	{$EXTERNALSYM TAEWORDITEMW}
+  _AEWORDITEMW = record
+    next: PAEWORDITEMW;
+    prev: PAEWORDITEMW;
+    nIndex: Integer;            //Reserved. Word items are automatically sorted.
+    pWord: PWideChar;           //Word string.
+    nWordLen: Integer;          //Word string length.
+    dwFlags: DWORD;             //See AEHLF_* defines.
+    dwFontStyle: DWORD;         //See AEHLS_* defines.
+    crText: COLORREF;           //Word text color. If -1, then don't set.
+    crBk: COLORREF;             //Word background color. If -1, then don't set.
+  end;
+  TAEWORDITEMW = _AEWORDITEMW;
+  {$EXTERNALSYM TAEWORDITEMW}
 
 
 type
-	_AEQUOTEITEMA = record
-		next: ^_AEQUOTEITEMA;
-		prev: ^_AEQUOTEITEMA;
-		nIndex: Integer;                //Reserved. Quote start items are automatically grouped in standalone stack, if following members are equal: pQuoteStart, chEscape and dwFlags with AEHLF_QUOTESTART_ISDELIMITER, AEHLF_ATLINESTART, AEHLF_QUOTESTART_ISWORD.
-		pQuoteStart: PChar;   //Quote start string.
-		nQuoteStartLen: Integer;        //Quote start string length.
-		pQuoteEnd: PChar;     //Quote end string. If NULL, line end used as quote end.
-		nQuoteEndLen: Integer;          //Quote end string length.
-		chEscape: char;             //Escape character. If it precedes quote string then quote ignored.
-		pQuoteInclude: PChar; //Quote include string.
-		nQuoteIncludeLen: Integer;      //Quote include string length.
-		pQuoteExclude: PChar; //Quote exclude string.
-		nQuoteExcludeLen: Integer;      //Quote exclude string length.
-		dwFlags: DWORD;             //See AEHLF_* defines.
-		dwFontStyle: DWORD;         //See AEHLS_* defines.
-		crText: COLORREF;           //Quote text color. If -1, then don't set.
-		crBk: COLORREF;             //Quote background color. If -1, then don't set.
-		lpQuoteStart: Pointer;        //Don't use it. For internal code only.
-	end;
-	TAEQUOTEITEMA = _AEQUOTEITEMA;
-	{$EXTERNALSYM TAEQUOTEITEMA}
+  PAEQUOTEITEMA = ^TAEQUOTEITEMA;
+  _AEQUOTEITEMA = record
+    next: PAEQUOTEITEMA;
+    prev: PAEQUOTEITEMA;
+    nIndex: Integer;                //Reserved. Quote start items are automatically grouped in standalone stack, if following members are equal: pQuoteStart, chEscape and dwFlags with AEHLF_QUOTESTART_ISDELIMITER, AEHLF_ATLINESTART, AEHLF_QUOTESTART_ISWORD.
+    pQuoteStart: PAnsiChar;   //Quote start string.
+    nQuoteStartLen: Integer;        //Quote start string length.
+    pQuoteEnd: PAnsiChar;     //Quote end string. If NULL, line end used as quote end.
+    nQuoteEndLen: Integer;          //Quote end string length.
+    chEscape: AnsiChar;             //Escape character. If it precedes quote string then quote ignored.
+    pQuoteInclude: PAnsiChar; //Quote include string.
+    nQuoteIncludeLen: Integer;      //Quote include string length.
+    pQuoteExclude: PAnsiChar; //Quote exclude string.
+    nQuoteExcludeLen: Integer;      //Quote exclude string length.
+    dwFlags: DWORD;             //See AEHLF_* defines.
+    dwFontStyle: DWORD;         //See AEHLS_* defines.
+    crText: COLORREF;           //Quote text color. If -1, then don't set.
+    crBk: COLORREF;             //Quote background color. If -1, then don't set.
+    lpQuoteStart: Pointer;        //Don't use it. For internal code only.
+  end;
+  TAEQUOTEITEMA = _AEQUOTEITEMA;
+  {$EXTERNALSYM TAEQUOTEITEMA}
 
 
 type
   PAEQUOTEITEMW = ^TAEQUOTEITEMW;
-	_AEQUOTEITEMW = record
-		next: PAEQUOTEITEMW;
-		prev: PAEQUOTEITEMW;
-		nIndex: Integer;               //Reserved. Quote start items are automatically grouped in standalone stack, if following members are equal: pQuoteStart, chEscape and dwFlags with AEHLF_QUOTESTART_ISDELIMITER, AEHLF_ATLINESTART, AEHLF_QUOTESTART_ISWORD.
-		pQuoteStart: PWideChar;        //Quote start string.
-		nQuoteStartLen: Integer;       //Quote start string length.
-		pQuoteEnd: PWideChar;          //Quote end string. If NULL, line end used as quote end.
-		nQuoteEndLen: Integer;         //Quote end string length.
-		chEscape: WideChar;            //Escape character. If it precedes quote string then quote ignored.
-		pQuoteInclude: PWideChar;      //Quote include string.
-		nQuoteIncludeLen: Integer;     //Quote include string length.
-		pQuoteExclude: PWideChar;      //Quote exclude string.
-		nQuoteExcludeLen: Integer;     //Quote exclude string length.
-		dwFlags: DWORD;                //See AEHLF_* defines.
-		dwFontStyle: DWORD;            //See AEHLS_* defines.
-		crText: COLORREF;              //Quote text color. If -1, then don't set.
-		crBk: COLORREF;                //Quote background color. If -1, then don't set.
-		lpQuoteStart: Pointer;         //Don't use it. For internal code only.
-	end;
-	TAEQUOTEITEMW = _AEQUOTEITEMW;
-	{$EXTERNALSYM TAEQUOTEITEMW}
+  _AEQUOTEITEMW = record
+    next: PAEQUOTEITEMW;
+    prev: PAEQUOTEITEMW;
+    nIndex: Integer;               //Reserved. Quote start items are automatically grouped in standalone stack, if following members are equal: pQuoteStart, chEscape and dwFlags with AEHLF_QUOTESTART_ISDELIMITER, AEHLF_ATLINESTART, AEHLF_QUOTESTART_ISWORD.
+    pQuoteStart: PWideChar;        //Quote start string.
+    nQuoteStartLen: Integer;       //Quote start string length.
+    pQuoteEnd: PWideChar;          //Quote end string. If NULL, line end used as quote end.
+    nQuoteEndLen: Integer;         //Quote end string length.
+    chEscape: WideChar;            //Escape character. If it precedes quote string then quote ignored.
+    pQuoteInclude: PWideChar;      //Quote include string.
+    nQuoteIncludeLen: Integer;     //Quote include string length.
+    pQuoteExclude: PWideChar;      //Quote exclude string.
+    nQuoteExcludeLen: Integer;     //Quote exclude string length.
+    dwFlags: DWORD;                //See AEHLF_* defines.
+    dwFontStyle: DWORD;            //See AEHLS_* defines.
+    crText: COLORREF;              //Quote text color. If -1, then don't set.
+    crBk: COLORREF;                //Quote background color. If -1, then don't set.
+    lpQuoteStart: Pointer;         //Don't use it. For internal code only.
+  end;
+  TAEQUOTEITEMW = _AEQUOTEITEMW;
+  {$EXTERNALSYM TAEQUOTEITEMW}
 
 
 type
   PAEMARKTEXTITEMA = ^TAEMARKTEXTITEMA;
-	_AEMARKTEXTITEMA = record
-		next: PAEMARKTEXTITEMA;
-		prev: PAEMARKTEXTITEMA;
-		nIndex: Integer;            //Position of the element if positive inserts to begin of stack if negative to end.
-		pMarkText: PAnsiChar;       //Mark text.
-		nMarkTextLen: Integer;      //Mark text length.
-		dwFlags: DWORD;             //See AEHLF_* defines.
-		dwFontStyle: DWORD;         //See AEHLS_* defines.
-		crText: COLORREF;           //Mark text color. If -1, then don't set.
-		crBk: COLORREF;             //Mark background color. If -1, then don't set.
-	end;
-	TAEMARKTEXTITEMA = _AEMARKTEXTITEMA;
-	{$EXTERNALSYM TAEMARKTEXTITEMA}
+  _AEMARKTEXTITEMA = record
+    next: PAEMARKTEXTITEMA;
+    prev: PAEMARKTEXTITEMA;
+    nIndex: Integer;            //Position of the element if positive inserts to begin of stack if negative to end.
+    pMarkText: PAnsiChar;       //Mark text.
+    nMarkTextLen: Integer;      //Mark text length.
+    dwFlags: DWORD;             //See AEHLF_* defines.
+    dwFontStyle: DWORD;         //See AEHLS_* defines.
+    crText: COLORREF;           //Mark text color. If -1, then don't set.
+    crBk: COLORREF;             //Mark background color. If -1, then don't set.
+  end;
+  TAEMARKTEXTITEMA = _AEMARKTEXTITEMA;
+  {$EXTERNALSYM TAEMARKTEXTITEMA}
 
 
 type
   PAEMARKTEXTITEMW = ^TAEMARKTEXTITEMW;
-	_AEMARKTEXTITEMW = record
-		next: PAEMARKTEXTITEMW;
-		prev: PAEMARKTEXTITEMW;
-		nIndex: Integer;            //Position of the element if positive inserts to begin of stack if negative to end.
-		pMarkText: PWideChar;       //Mark text.
-		nMarkTextLen: Integer;      //Mark text length.
-		dwFlags: DWORD;             //See AEHLF_* defines.
-		dwFontStyle: DWORD;         //See AEHLS_* defines.
-		crText: COLORREF;           //Mark text color. If -1, then don't set.
-		crBk: COLORREF;             //Mark background color. If -1, then don't set.
-	end;
-	TAEMARKTEXTITEMW = _AEMARKTEXTITEMW;
-	{$EXTERNALSYM TAEMARKTEXTITEMW}
+  _AEMARKTEXTITEMW = record
+    next: PAEMARKTEXTITEMW;
+    prev: PAEMARKTEXTITEMW;
+    nIndex: Integer;            //Position of the element if positive inserts to begin of stack if negative to end.
+    pMarkText: PWideChar;       //Mark text.
+    nMarkTextLen: Integer;      //Mark text length.
+    dwFlags: DWORD;             //See AEHLF_* defines.
+    dwFontStyle: DWORD;         //See AEHLS_* defines.
+    crText: COLORREF;           //Mark text color. If -1, then don't set.
+    crBk: COLORREF;             //Mark background color. If -1, then don't set.
+  end;
+  TAEMARKTEXTITEMW = _AEMARKTEXTITEMW;
+  {$EXTERNALSYM TAEMARKTEXTITEMW}
 
 
 type
   PAEMARKRANGEITEM = ^TAEMARKRANGEITEM;
-	_AEMARKRANGEITEM = record
-		next: PAEMARKRANGEITEM;
-		prev: PAEMARKRANGEITEM;
-		nIndex: Integer;          //Position of the element if positive inserts to begin of stack if negative to end.
-		crMarkRange: TCHARRANGE64; //cpMin member is the first character in the range (RichEdit offset), cpMax member is the last character in the range (RichEdit offset).
-		dwFlags: DWORD;           //Reserved.
-		dwFontStyle: DWORD;       //See AEHLS_* defines.
-		crText: COLORREF;         //Mark text color. If -1, then don't set.
-		crBk: COLORREF;           //Mark background color. If -1, then don't set.
-	end;
-	TAEMARKRANGEITEM = _AEMARKRANGEITEM;
-	{$EXTERNALSYM TAEMARKRANGEITEM}
+  _AEMARKRANGEITEM = record
+    next: PAEMARKRANGEITEM;
+    prev: PAEMARKRANGEITEM;
+    nIndex: Integer;          //Position of the element if positive inserts to begin of stack if negative to end.
+    crMarkRange: TCHARRANGE64; //cpMin member is the first character in the range (RichEdit offset), cpMax member is the last character in the range (RichEdit offset).
+    dwFlags: DWORD;           //Reserved.
+    dwFontStyle: DWORD;       //See AEHLS_* defines.
+    crText: COLORREF;         //Mark text color. If -1, then don't set.
+    crBk: COLORREF;           //Mark background color. If -1, then don't set.
+  end;
+  TAEMARKRANGEITEM = _AEMARKRANGEITEM;
+  {$EXTERNALSYM TAEMARKRANGEITEM}
 
 
 type
@@ -2569,7 +2568,7 @@ EM_GETTEXTEX64
 
 //// AkelEdit messages description
 
-{$REGION 'AkelEdit messages manual'}
+{$IF CompilerVersion > 20}{$REGION 'AkelEdit messages manual'}{$IFEND}
 
 (*
 
@@ -6857,7 +6856,7 @@ Example:
 
 *)
 
-{$ENDREGION}
+{$IF CompilerVersion > 20}{$ENDREGION}{$IFEND}
 
 
 //// UNICODE define
@@ -6981,18 +6980,23 @@ const
   {$EXTERNALSYM AEM_HLADDMARKTEXT}
 {$endif}
 
-function AEC_IsSurrogate(c: WideChar): Boolean; inline;
-function AEC_IsHighSurrogate(c: WideChar): Boolean; inline;
-function AEC_IsLowSurrogate(c: WideChar): Boolean; inline;
+// Fr0sT: inlines available since D2006
+{$IF CompilerVersion >= 16}
+  {$DEFINE INLINES}
+{$IFEND}
+
+function AEC_IsSurrogate(c: WideChar): Boolean;     {$IFDEF INLINES}inline;{$ENDIF}
+function AEC_IsHighSurrogate(c: WideChar): Boolean; {$IFDEF INLINES}inline;{$ENDIF}
+function AEC_IsLowSurrogate(c: WideChar): Boolean;  {$IFDEF INLINES}inline;{$ENDIF}
 
 function AEC_CopyChar(wszTarget: PWideChar; dwTargetSize: DWORD; const wpSource: PWideChar): Integer;
 function AEC_IndexInc(var ciChar: TAECHARINDEX): Integer;
-//int AEC_IndexDec(AECHARINDEX *ciChar)
+function AEC_IndexDec(var ciChar: TAECHARINDEX): Integer;
 function AEC_IndexLen(const ciChar: TAECHARINDEX): Integer;
 function AEC_IndexCompare(const ciChar1, ciChar2: TAECHARINDEX): Integer;
 //int AEC_IndexCompareEx(const AECHARINDEX *ciChar1, const AECHARINDEX *ciChar2)
 function AEC_NextLine(var ciChar: TAECHARINDEX): PAELINEDATA;
-//AELINEDATA* AEC_PrevLine(AECHARINDEX *ciChar)
+function AEC_PrevLine(var ciChar: TAECHARINDEX): PAELINEDATA;
 //AELINEDATA* AEC_NextLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
 //AELINEDATA* AEC_PrevLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
 function AEC_NextChar(var ciChar: TAECHARINDEX): PAELINEDATA;
@@ -7062,37 +7066,27 @@ end;
 
 function AEC_IndexInc(var ciChar: TAECHARINDEX): Integer;
 begin
+  Result := 1;
+
   if (ciChar.nCharInLine >= 0) and (ciChar.nCharInLine + 1 < ciChar.lpLine.nLineLen) then
-  begin
     if AEC_IsHighSurrogate(ciChar.lpLine.wpLine[ciChar.nCharInLine]) and
        AEC_IsLowSurrogate(ciChar.lpLine.wpLine[ciChar.nCharInLine + 1]) then
          Result := 2;
-  end
-  else
-    Result := 1;
 
   Inc(ciChar.nCharInLine, Result);
 end;
 
-(*
+function AEC_IndexDec(var ciChar: TAECHARINDEX): Integer;
+begin
+  Result := 1;
 
-int AEC_IndexDec(AECHARINDEX *ciChar)
-{
-  if (ciChar->nCharInLine - 2 >= 0 &&
-      ciChar->nCharInLine - 1 < ciChar->lpLine->nLineLen)
-  {
-    if (AEC_IsLowSurrogate(ciChar->lpLine->wpLine[ciChar->nCharInLine - 1]) &&
-        AEC_IsHighSurrogate(ciChar->lpLine->wpLine[ciChar->nCharInLine - 2]))
-    {
-      ciChar->nCharInLine-=2;
-      return 2;
-    }
-  }
-  --ciChar->nCharInLine;
-  return 1;
-}
+  if (ciChar.nCharInLine - 2 >= 0) and (ciChar.nCharInLine - 1 < ciChar.lpLine.nLineLen) then
+    if AEC_IsLowSurrogate(ciChar.lpLine.wpLine[ciChar.nCharInLine - 1]) and
+       AEC_IsHighSurrogate(ciChar.lpLine.wpLine[ciChar.nCharInLine - 2]) then
+         Result := 2;
 
-*)
+  Dec(ciChar.nCharInLine, Result);
+end;
 
 function AEC_IndexLen(const ciChar: TAECHARINDEX): Integer;
 begin
@@ -7156,22 +7150,24 @@ begin
   Result := ciChar.lpLine;
 end;
 
+function AEC_PrevLine(var ciChar: TAECHARINDEX): PAELINEDATA;
+begin
+  if ciChar.lpLine <> nil then
+  begin
+    Dec(ciChar.nLine);
+    ciChar.lpLine := ciChar.lpLine.prev;
+    if ciChar.lpLine <> nil then
+      ciChar.nCharInLine := ciChar.lpLine.nLineLen
+    else
+      ciChar.nCharInLine := 0;
+  end;
+  Result := ciChar.lpLine;
+end;
+
+
 
 (*
 
-AELINEDATA* AEC_PrevLine(AECHARINDEX *ciChar)
-{
-  if (ciChar->lpLine)
-  {
-    ciChar->nLine-=1;
-    ciChar->lpLine=ciChar->lpLine->prev;
-    if (ciChar->lpLine)
-      ciChar->nCharInLine=ciChar->lpLine->nLineLen;
-    else
-      ciChar->nCharInLine=0;
-  }
-  return ciChar->lpLine;
-}
 
 AELINEDATA* AEC_NextLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
 {
