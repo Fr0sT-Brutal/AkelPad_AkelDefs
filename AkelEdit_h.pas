@@ -6870,8 +6870,6 @@ const
 type
   TTEXTRANGE64 = TTEXTRANGE64A;
   {$EXTERNALSYM TTEXTRANGE64}
-//  TFINDTEXT64 = TFINDTEXT64A;     {}
-//  {$EXTERNALSYM TFINDTEXT64}
   TFINDTEXTEX64 = TFINDTEXTEX64A;
   {$EXTERNALSYM TFINDTEXTEX64}
 
@@ -6929,8 +6927,6 @@ const
 type
   TTEXTRANGE64 = TTEXTRANGE64W;
   {$EXTERNALSYM TTEXTRANGE64}
-//  TFINDTEXT64 = TFINDTEXT64W;     {}
-//  {$EXTERNALSYM TFINDTEXT64}
   TFINDTEXTEX64 = TFINDTEXTEX64W;
   {$EXTERNALSYM TFINDTEXTEX64}
 
@@ -6994,13 +6990,13 @@ function AEC_IndexInc(var ciChar: TAECHARINDEX): Integer;
 function AEC_IndexDec(var ciChar: TAECHARINDEX): Integer;
 function AEC_IndexLen(const ciChar: TAECHARINDEX): Integer;
 function AEC_IndexCompare(const ciChar1, ciChar2: TAECHARINDEX): Integer;
-//int AEC_IndexCompareEx(const AECHARINDEX *ciChar1, const AECHARINDEX *ciChar2)
+function AEC_IndexCompareEx(const ciChar1, ciChar2: TAECHARINDEX): Integer;
 function AEC_NextLine(var ciChar: TAECHARINDEX): PAELINEDATA;
 function AEC_PrevLine(var ciChar: TAECHARINDEX): PAELINEDATA;
-//AELINEDATA* AEC_NextLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-//AELINEDATA* AEC_PrevLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+function AEC_NextLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+function AEC_PrevLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
 function AEC_NextChar(var ciChar: TAECHARINDEX): PAELINEDATA;
-//AELINEDATA* AEC_PrevChar(AECHARINDEX *ciChar)
+function AEC_PrevChar(var ciChar: TAECHARINDEX): PAELINEDATA;
 //AELINEDATA* AEC_NextCharEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
 //AELINEDATA* AEC_PrevCharEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
 //AELINEDATA* AEC_NextCharInLine(AECHARINDEX *ciChar)
@@ -7110,34 +7106,24 @@ begin
     Result := 1;
 end;
 
-(*
-
-int AEC_IndexCompareEx(const AECHARINDEX *ciChar1, const AECHARINDEX *ciChar2)
-{
-  if ((ciChar1->nLine == ciChar2->nLine &&
-       ciChar1->nCharInLine == ciChar2->nCharInLine) ||
-      (ciChar1->lpLine && ciChar2->lpLine &&
-        ((ciChar1->lpLine->next == ciChar2->lpLine &&
-          ciChar1->lpLine->nLineBreak == AELB_WRAP &&
-          ciChar1->nCharInLine == ciChar1->lpLine->nLineLen &&
-          ciChar2->nCharInLine == 0) ||
-         (ciChar2->lpLine->next == ciChar1->lpLine &&
-          ciChar2->lpLine->nLineBreak == AELB_WRAP &&
-          ciChar2->nCharInLine == ciChar2->lpLine->nLineLen &&
-          ciChar1->nCharInLine == 0))))
-  {
-    return 0;
-  }
-  if ((ciChar1->nLine < ciChar2->nLine) ||
-      (ciChar1->nLine == ciChar2->nLine &&
-       ciChar1->nCharInLine < ciChar2->nCharInLine))
-  {
-    return -1;
-  }
-  return 1;
-}
-
-*)
+function AEC_IndexCompareEx(const ciChar1, ciChar2: TAECHARINDEX): Integer;
+begin
+  if
+    ( (ciChar1.nLine = ciChar2.nLine) and (ciChar1.nCharInLine = ciChar2.nCharInLine) ) or
+    (
+      (ciChar1.lpLine <> nil) and (ciChar2.lpLine <> nil) and
+      (
+        ( (ciChar1.lpLine.next = ciChar2.lpLine) and (ciChar1.lpLine.nLineBreak = AELB_WRAP) and (ciChar1.nCharInLine = ciChar1.lpLine.nLineLen) and (ciChar2.nCharInLine = 0) ) or
+        ( (ciChar2.lpLine.next = ciChar1.lpLine) and (ciChar2.lpLine.nLineBreak = AELB_WRAP) and (ciChar2.nCharInLine = ciChar2.lpLine.nLineLen) and (ciChar1.nCharInLine = 0) )
+      ))
+    then Result := 0
+  else if
+    (ciChar1.nLine < ciChar2.nLine) or
+    ( (ciChar1.nLine = ciChar2.nLine) and (ciChar1.nCharInLine < ciChar2.nCharInLine) )
+    then Result := -1
+  else
+    Result := 1;
+end;
 
 function AEC_NextLine(var ciChar: TAECHARINDEX): PAELINEDATA;
 begin
@@ -7164,43 +7150,37 @@ begin
   Result := ciChar.lpLine;
 end;
 
-
-
-(*
-
-
-AELINEDATA* AEC_NextLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-{
-  AECHARINDEX ciTmp=*ciIn;
-
-  if (AEC_NextLine(&ciTmp))
-  {
-    *ciOut=ciTmp;
-    return ciOut->lpLine;
-  }
+function AEC_NextLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+var ciTmp: TAECHARINDEX;
+begin
+  ciTmp := ciIn;
+  if AEC_NextLine(ciTmp) <> nil then
+  begin
+    ciOut := ciTmp;
+{}//    Result := ciOut.nLine;
+  end
   else
-  {
-    *ciOut=*ciIn;
-    return NULL;
-  }
-}
+  begin
+    ciOut := ciIn;
+    Result := nil;
+  end
+end;
 
-AELINEDATA* AEC_PrevLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-{
-  AECHARINDEX ciTmp=*ciIn;
-
-  if (AEC_PrevLine(&ciTmp))
-  {
-    *ciOut=ciTmp;
-    return ciOut->lpLine;
-  }
+function AEC_PrevLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+var ciTmp: TAECHARINDEX;
+begin
+  ciTmp := ciIn;
+  if AEC_PrevLine(ciTmp) <> nil then
+  begin
+    ciOut := ciTmp;
+{}//    Result := ciOut.nLine;
+  end
   else
-  {
-    *ciOut=*ciIn;
-    return NULL;
-  }
-}
-*)
+  begin
+    ciOut := ciIn;
+    Result := nil;
+  end
+end;
 
 function AEC_NextChar(var ciChar: TAECHARINDEX): PAELINEDATA;
 begin
@@ -7212,23 +7192,17 @@ begin
   Result := ciChar.lpLine;
 end;
 
-(*
-
-AELINEDATA* AEC_PrevChar(AECHARINDEX *ciChar)
-{
+function AEC_PrevChar(var ciChar: TAECHARINDEX): PAELINEDATA;
+begin
   AEC_IndexDec(ciChar);
-
-  if (ciChar->nCharInLine < 0)
-  {
-    if (AEC_PrevLine(ciChar))
-    {
-      if (ciChar->lpLine->nLineBreak == AELB_WRAP)
+  if ciChar.nCharInLine < 0 then
+    if AEC_PrevLine(ciChar) <> nil then
+      if ciChar.lpLine.nLineBreak = AELB_WRAP then
         AEC_IndexDec(ciChar);
-    }
-  }
-  return ciChar->lpLine;
-}
+  Result := ciChar.lpLine;
+end;
 
+(*
 AELINEDATA* AEC_NextCharEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
 {
   AECHARINDEX ciTmp=*ciIn;
