@@ -8,7 +8,7 @@
   #define MAKE_IDENTIFIER(a, b, c, d)  ((DWORD)MAKELONG(MAKEWORD(a, b), MAKEWORD(c, d)))
 #endif
 
-#define AKELDLL MAKE_IDENTIFIER(1, 6, 0, 6)
+#define AKELDLL MAKE_IDENTIFIER(1, 6, 0, 7)
 
 
 //// Defines
@@ -177,6 +177,7 @@
 #define MI_INSTANCEEXE               3    //Return: EXE instance.
 #define MI_PLUGINSSTACK              4    //Return: copied bytes. (HSTACK *)lParam - buffer that receives plugin stack.
 #define MI_SAVESETTINGS              5    //Return: see SS_* defines.
+#define MI_WNDPROGRESS               10   //Return: progress bar window handle.
 #define MI_WNDSTATUS                 11   //Return: status bar window handle.
 #define MI_WNDMDICLIENT              12   //Return: MDI client window handle.
 #define MI_WNDTAB                    13   //Return: tab window handle.
@@ -351,8 +352,9 @@
 #define NEWLINE_MAC   3  //MacOS new line format (\r).
 
 //AKD_GOTO type
-#define GT_LINE    0x1
-#define GT_OFFSET  0x2
+#define GT_LINE        0x1 //Go to "Line:Column".
+#define GT_OFFSETBYTE  0x2 //Go to offset counted in bytes.
+#define GT_OFFSETCHAR  0x4 //Go to offset counted in characters (not present in "Go to..." dialog).
 
 //Caret options
 #define CO_CARETOUTEDGE          0x00000001  //Allow caret moving out of the line edge.
@@ -874,6 +876,7 @@ typedef struct {
   DWORD dwLangID;         //Codepage recognition language defined as LANGID. If -1, then use current settings.
   const char *pText;      //Ansi text.
   INT_PTR nTextLen;       //Text length. If this value is -1, the string is assumed to be null-terminated and the length is calculated automatically.
+  INT_PTR nMinChars;      //Minimum detect characters representation. If zero, default number is used.
   int nCodePage;          //Result: detected Ansi codepage.
 } DETECTANSITEXT;
 
@@ -881,6 +884,7 @@ typedef struct {
   DWORD dwLangID;         //Codepage recognition language defined as LANGID. If -1, then use current settings.
   const wchar_t *wpText;  //Unicode text.
   INT_PTR nTextLen;       //Text length. If this value is -1, the string is assumed to be null-terminated and the length is calculated automatically.
+  INT_PTR nMinChars;      //Minimum detect characters representation. If zero, default number is used.
   int nCodePageFrom;      //Result: codepage that converts text to Ansi without character lost.
   int nCodePageTo;        //Result: detected Ansi codepage.
 } DETECTUNITEXT;
@@ -2654,6 +2658,7 @@ Example:
  dat.dwLangID=(DWORD)-1;
  dat.pText="\x91\x20\xE7\xA5\xA3\xAE\x20\xAD\xA0\xE7\xA8\xAD\xA0\xA5\xE2\xE1\xEF\x20\x90\xAE\xA4\xA8\xAD\xA0";
  dat.nTextLen=-1;
+ dat.nMinChars=0;
  SendMessage(hMainWnd, AKD_DETECTANSITEXT, 0, (LPARAM)&dat);
 
 
@@ -2675,6 +2680,7 @@ Example:
  dut.dwLangID=(DWORD)-1;
  dut.wpText=L"\x2018\x0020\x0437\x0490\x0408\x00AE\x0020\x00AD\x00A0\x0437\x0401\x00AD\x00A0\x0490\x0432\x0431\x043F\x0020\x0452\x00AE\x00A4\x0401\x00AD\x00A0";
  dut.nTextLen=-1;
+ dut.nMinChars=0;
  SendMessage(hMainWnd, AKD_DETECTUNITEXT, 0, (LPARAM)&dut);
 
 
@@ -4692,7 +4698,7 @@ Retrieves a specified range of characters from a AkelEdit control.
 (EXGETTEXTRANGE *)lParam == pointer to a EXGETTEXTRANGE structure.
 
 Return Value
- Text length in TCHARs. Without null character if EXGETTEXTRANGE.pText member is not NULL or including null character if EXGETTEXTRANGE.pText member is NULL.
+ Text length in TCHARs.
 
 Example (bOldWindows == FALSE):
  EXGETTEXTRANGE tr;

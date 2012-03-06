@@ -251,8 +251,12 @@
 #define AEGI_LASTFULLVISIBLELINE   13  //Last character of the last fully visible line, collapsed lines are skipped.
                                        //
 //Next flags require pointer to the input index in lParam.
-#define AEGI_VALIDCHARINLINE       17  //Correct character to make sure that it is on line.
+#define AEGI_VALIDCHARINLINE       15  //Correct character to make sure that it is on line.
                                        //For better performance use AEC_ValidCharInLine instead.
+#define AEGI_LINEBEGIN             16  //First character in line.
+                                       //
+#define AEGI_LINEEND               17  //Last character in line.
+                                       //
 #define AEGI_WRAPLINEBEGIN         18  //First character of the unwrapped line. Returns number of characters as AEM_GETINDEX result.
                                        //For better performance use AEC_WrapLineBeginEx instead.
 #define AEGI_WRAPLINEEND           19  //Last character of the unwrapped line. Returns number of characters as AEM_GETINDEX result.
@@ -552,6 +556,7 @@
 #define AEFR_MATCHCASE       0x00000004  //If set, the search operation is case-sensitive. If not set, the search operation is case-insensitive.
 
 //AEM_SETWORDWRAP flags
+#define AEWW_NONE            0x00000000  //Turn off wrap.
 #define AEWW_WORD            0x00000001  //Wrap by words.
 #define AEWW_SYMBOL          0x00000002  //Wrap by symbols.
 #define AEWW_LIMITPIXEL      0x00000100  //Limit in pixels (default).
@@ -6020,7 +6025,6 @@ Example:
   #define AES_RICHEDITCLASS AES_RICHEDITCLASSA
 
   #define TEXTRANGE64 TEXTRANGE64A
-  #define FINDTEXT64 FINDTEXT64A
   #define FINDTEXTEX64 FINDTEXTEX64A
 
   #define AEAPPENDTEXT AEAPPENDTEXTA
@@ -6050,7 +6054,6 @@ Example:
   #define AES_RICHEDITCLASS AES_RICHEDITCLASSW
 
   #define TEXTRANGE64 TEXTRANGE64W
-  #define FINDTEXT64 FINDTEXT64W
   #define FINDTEXTEX64 FINDTEXTEX64W
 
   #define AEAPPENDTEXT AEAPPENDTEXTW

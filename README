@@ -1,2 +1,3 @@
 Include units containing Delphi translation of plugin API for AkelPad text editor.
-AkelDLL.h and AkelEdit.h header files are the versions of the original API on which translated units are based.
+
+AkelDLL.h and AkelEdit.h are the exact versions of the original API on which translated units are based.

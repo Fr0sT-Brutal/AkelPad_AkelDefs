@@ -1,5 +1,9 @@
 (*************************************************************************
 
+=========  AkelPad text editor plugin API ===========
+
+** Origin: AkelEdit.h located at
+   http://akelpad.cvs.sourceforge.net/akelpad_4/AkelFiles/Plugs/AkelDLL/AkelEdit.h
 ** Converted with C to Pascal Converter 2.0
 ** Release: 2.20.11.2011
 ** Email: al_gun@ncable.net.au
@@ -424,8 +428,13 @@ const AEGI_LASTFULLVISIBLELINE = 13;    //Last character of the last fully visib
 {$EXTERNALSYM AEGI_LASTFULLVISIBLELINE} //
 
 //Next flags require pointer to the input index in lParam.
-const AEGI_VALIDCHARINLINE = 17;      //Correct character to make sure that it is on line.
+const AEGI_VALIDCHARINLINE = 15;      //Correct character to make sure that it is on line.
 {$EXTERNALSYM AEGI_VALIDCHARINLINE}   //For better performance use AEC_ValidCharInLine instead.
+const AEGI_LINEBEGIN = 16;            //First character in line.
+{$EXTERNALSYM AEGI_LINEBEGIN}         //
+const AEGI_LINEEND = 17;              //Last character in line.
+{$EXTERNALSYM AEGI_LINEEND}           //
+
 const AEGI_WRAPLINEBEGIN = 18;        //First character of the unwrapped line. Returns number of characters as AEM_GETINDEX result.
 {$EXTERNALSYM AEGI_WRAPLINEBEGIN}     //For better performance use AEC_WrapLineBeginEx instead.
 const AEGI_WRAPLINEEND = 19;          //Last character of the unwrapped line. Returns number of characters as AEM_GETINDEX result.
@@ -897,6 +906,8 @@ const AEFR_MATCHCASE = $00000004;  //If set, the search operation is -sensitive.
 {$EXTERNALSYM AEFR_MATCHCASE}
 
 //AEM_SETWORDWRAP flags
+const AEWW_NONE = $00000000;  //Turn off wrap.
+{$EXTERNALSYM AEWW_NONE}
 const AEWW_WORD = $00000001;  //Wrap by words.
 {$EXTERNALSYM AEWW_WORD}
 const AEWW_SYMBOL = $00000002;  //Wrap by symbols.
@@ -6997,23 +7008,23 @@ function AEC_NextLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAEL
 function AEC_PrevLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
 function AEC_NextChar(var ciChar: TAECHARINDEX): PAELINEDATA;
 function AEC_PrevChar(var ciChar: TAECHARINDEX): PAELINEDATA;
-//AELINEDATA* AEC_NextCharEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-//AELINEDATA* AEC_PrevCharEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-//AELINEDATA* AEC_NextCharInLine(AECHARINDEX *ciChar)
-//AELINEDATA* AEC_PrevCharInLine(AECHARINDEX *ciChar)
-//AELINEDATA* AEC_NextCharInLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-//AELINEDATA* AEC_PrevCharInLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-//AELINEDATA* AEC_ValidCharInLine(AECHARINDEX *ciChar)
-//int AEC_WrapLineBegin(AECHARINDEX *ciChar)
-//int AEC_WrapLineEnd(AECHARINDEX *ciChar)
-//int AEC_WrapLineBeginEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-//int AEC_WrapLineEndEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
+function AEC_NextCharEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+function AEC_PrevCharEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+function AEC_NextCharInLine(var ciChar: TAECHARINDEX): PAELINEDATA;
+function AEC_PrevCharInLine(var ciChar: TAECHARINDEX): PAELINEDATA;
+function AEC_NextCharInLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+function AEC_PrevCharInLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+function AEC_ValidCharInLine(var ciChar: TAECHARINDEX): PAELINEDATA;
+function AEC_WrapLineBegin(var ciChar: TAECHARINDEX): Integer;
+function AEC_WrapLineEnd(var ciChar: TAECHARINDEX): Integer;
+function AEC_WrapLineBeginEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): Integer;
+function AEC_WrapLineEndEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): Integer;
 //int AEC_CharAtIndex(const AECHARINDEX *ciChar)
-//BOOL AEC_IsCharInSelection(const AECHARINDEX *ciChar)
-//BOOL AEC_IsFirstCharInLine(const AECHARINDEX *ciChar)
-//BOOL AEC_IsLastCharInLine(const AECHARINDEX *ciChar)
-//AEFOLD* AEC_NextFold(AEFOLD *lpFold, BOOL bRecursive)
-//AEFOLD* AEC_PrevFold(AEFOLD *lpFold, BOOL bRecursive)
+function AEC_IsCharInSelection(var ciChar: TAECHARINDEX): Boolean;
+function AEC_IsFirstCharInLine(var ciChar: TAECHARINDEX): Boolean;
+function AEC_IsLastCharInLine(var ciChar: TAECHARINDEX): Boolean;
+function AEC_NextFold(var lpFold: PAEFOLD; bRecursive: Boolean): PAEFOLD;
+function AEC_PrevFold(var lpFold: PAEFOLD; bRecursive: Boolean): PAEFOLD;
 
 implementation
 
@@ -7157,7 +7168,7 @@ begin
   if AEC_NextLine(ciTmp) <> nil then
   begin
     ciOut := ciTmp;
-{}//    Result := ciOut.nLine;
+    Result := ciOut.lpLine;
   end
   else
   begin
@@ -7173,7 +7184,7 @@ begin
   if AEC_PrevLine(ciTmp) <> nil then
   begin
     ciOut := ciTmp;
-{}//    Result := ciOut.nLine;
+    Result := ciOut.lpLine;
   end
   else
   begin
@@ -7202,160 +7213,162 @@ begin
   Result := ciChar.lpLine;
 end;
 
-(*
-AELINEDATA* AEC_NextCharEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-{
-  AECHARINDEX ciTmp=*ciIn;
-
-  if (AEC_NextChar(&ciTmp))
-  {
-    *ciOut=ciTmp;
-    return ciOut->lpLine;
-  }
+function AEC_NextCharEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+var ciTmp: TAECHARINDEX;
+begin
+  ciTmp := ciIn;
+  if AEC_NextChar(ciTmp) <> nil then
+  begin
+    ciOut := ciTmp;
+    Result := ciOut.lpLine;
+  end
   else
-  {
-    *ciOut=*ciIn;
-    return NULL;
-  }
-}
+  begin
+    ciOut := ciIn;
+    Result := nil;
+  end
+end;
 
-AELINEDATA* AEC_PrevCharEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-{
-  AECHARINDEX ciTmp=*ciIn;
-
-  if (AEC_PrevChar(&ciTmp))
-  {
-    *ciOut=ciTmp;
-    return ciOut->lpLine;
-  }
+function AEC_PrevCharEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+var ciTmp: TAECHARINDEX;
+begin
+  ciTmp := ciIn;
+  if AEC_PrevChar(ciTmp) <> nil then
+  begin
+    ciOut := ciTmp;
+    Result := ciOut.lpLine;
+  end
   else
-  {
-    *ciOut=*ciIn;
-    return NULL;
-  }
-}
+  begin
+    ciOut := ciIn;
+    Result := nil;
+  end
+end;
 
-AELINEDATA* AEC_NextCharInLine(AECHARINDEX *ciChar)
-{
+function AEC_NextCharInLine(var ciChar: TAECHARINDEX): PAELINEDATA;
+begin
   AEC_IndexInc(ciChar);
-
-  if (ciChar->nCharInLine >= ciChar->lpLine->nLineLen)
-  {
-    if (ciChar->lpLine->nLineBreak == AELB_WRAP)
-      AEC_NextLine(ciChar);
+  if ciChar.nCharInLine >= ciChar.lpLine.nLineLen then
+    if ciChar.lpLine.nLineBreak = AELB_WRAP then
+      AEC_NextLine(ciChar)
     else
-      return NULL;
-  }
-  return ciChar->lpLine;
-}
+    begin
+      Result := nil;
+      Exit;
+    end;
+  Result := ciChar.lpLine;
+end;
 
-AELINEDATA* AEC_PrevCharInLine(AECHARINDEX *ciChar)
-{
-  if (ciChar->nCharInLine == 0)
-  {
-    if (!ciChar->lpLine->prev || ciChar->lpLine->prev->nLineBreak != AELB_WRAP)
-      return NULL;
-  }
+function AEC_PrevCharInLine(var ciChar: TAECHARINDEX): PAELINEDATA;
+begin
+  if ciChar.nCharInLine = 0 then
+    if (ciChar.lpLine.prev = nil) or (ciChar.lpLine.prev.nLineBreak <> AELB_WRAP) then
+    begin
+      Result := nil;
+      Exit;
+    end;
   AEC_PrevChar(ciChar);
-  return ciChar->lpLine;
-}
+  Result := ciChar.lpLine;
+end;
 
-AELINEDATA* AEC_NextCharInLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-{
-  AECHARINDEX ciTmp=*ciIn;
-
-  if (AEC_NextCharInLine(&ciTmp))
-  {
-    *ciOut=ciTmp;
-    return ciOut->lpLine;
-  }
+function AEC_NextCharInLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+var ciTmp: TAECHARINDEX;
+begin
+  ciTmp := ciIn;
+  if AEC_NextCharInLine(ciTmp) <> nil then
+  begin
+    ciOut := ciTmp;
+    Result := ciOut.lpLine;
+  end
   else
-  {
-    *ciOut=*ciIn;
-    return NULL;
-  }
-}
+  begin
+    ciOut := ciIn;
+    Result := nil;
+  end
+end;
 
-AELINEDATA* AEC_PrevCharInLineEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-{
-  AECHARINDEX ciTmp=*ciIn;
-
-  if (AEC_PrevCharInLine(&ciTmp))
-  {
-    *ciOut=ciTmp;
-    return ciOut->lpLine;
-  }
+function AEC_PrevCharInLineEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): PAELINEDATA;
+var ciTmp: TAECHARINDEX;
+begin
+  ciTmp := ciIn;
+  if AEC_PrevCharInLine(ciTmp) <> nil then
+  begin
+    ciOut := ciTmp;
+    Result := ciOut.lpLine;
+  end
   else
-  {
-    *ciOut=*ciIn;
-    return NULL;
-  }
-}
+  begin
+    ciOut := ciIn;
+    Result := nil;
+  end
+end;
 
-AELINEDATA* AEC_ValidCharInLine(AECHARINDEX *ciChar)
-{
-  if (ciChar->nCharInLine >= ciChar->lpLine->nLineLen)
-  {
-    if (ciChar->lpLine->nLineBreak == AELB_WRAP)
-      AEC_NextLine(ciChar);
+function AEC_ValidCharInLine(var ciChar: TAECHARINDEX): PAELINEDATA;
+begin
+  if ciChar.nCharInLine >= ciChar.lpLine.nLineLen then
+    if ciChar.lpLine.nLineBreak = AELB_WRAP then
+      AEC_NextLine(ciChar)
     else
-      ciChar->nCharInLine=ciChar->lpLine->nLineLen;
-  }
-  else if (ciChar->nCharInLine < 0)
-  {
-    ciChar->nCharInLine=0;
-  }
-  return ciChar->lpLine;
-}
+      ciChar.nCharInLine := ciChar.lpLine.nLineLen
+  else if ciChar.nCharInLine < 0 then
+    ciChar.nCharInLine := 0;
+  Result := ciChar.lpLine;
+end;
 
-int AEC_WrapLineBegin(AECHARINDEX *ciChar)
-{
-  int nCount=ciChar->nCharInLine;
+function AEC_WrapLineBegin(var ciChar: TAECHARINDEX): Integer;
+begin
+  Result := ciChar.nCharInLine;
+  if ciChar.lpLine <> nil then
+  begin
+    while ciChar.lpLine.prev <> nil do
+    begin
+      if ciChar.lpLine.prev.nLineBreak <> AELB_WRAP then
+        Break;
+      Dec(ciChar.nLine);
+      ciChar.lpLine := ciChar.lpLine.prev;
+      Inc(Result, ciChar.lpLine.nLineLen);
+    end;
+  end;
+  ciChar.nCharInLine := 0;
+end;
 
-  if (ciChar->lpLine)
-  {
-    while (ciChar->lpLine->prev)
-    {
-      if (ciChar->lpLine->prev->nLineBreak != AELB_WRAP)
-        break;
+function AEC_WrapLineEnd(var ciChar: TAECHARINDEX): Integer;
+begin
+  Result := ciChar.lpLine.nLineLen - ciChar.nCharInLine;
+  while ciChar.lpLine <> nil do
+  begin
+    if ciChar.lpLine.nLineBreak <> AELB_WRAP then
+      Break;
+    Inc(ciChar.nLine);
+    ciChar.lpLine := ciChar.lpLine.next;
+    Inc(Result, ciChar.lpLine.nLineLen);
+  end;
+  ciChar.nCharInLine := ciChar.lpLine.nLineLen;
+end;
 
-      --ciChar->nLine;
-      ciChar->lpLine=ciChar->lpLine->prev;
-      nCount+=ciChar->lpLine->nLineLen;
-    }
-  }
-  ciChar->nCharInLine=0;
-  return nCount;
-}
+function AEC_WrapLineBeginEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): Integer;
+begin
+  ciOut := ciIn;
+  Result := AEC_WrapLineBegin(ciOut);
+end;
 
-int AEC_WrapLineEnd(AECHARINDEX *ciChar)
-{
-  int nCount=ciChar->lpLine->nLineLen - ciChar->nCharInLine;
+function AEC_WrapLineEndEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): Integer;
+begin
+  ciOut := ciIn;
+  Result := AEC_WrapLineEnd(ciOut);
+end;
 
-  while (ciChar->lpLine)
-  {
-    if (ciChar->lpLine->nLineBreak != AELB_WRAP)
-      break;
-
-    ++ciChar->nLine;
-    ciChar->lpLine=ciChar->lpLine->next;
-    nCount+=ciChar->lpLine->nLineLen;
-  }
-  ciChar->nCharInLine=ciChar->lpLine->nLineLen;
-  return nCount;
-}
-
-int AEC_WrapLineBeginEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-{
-  *ciOut=*ciIn;
-  return AEC_WrapLineBegin(ciOut);
-}
-
-int AEC_WrapLineEndEx(const AECHARINDEX *ciIn, AECHARINDEX *ciOut)
-{
-  *ciOut=*ciIn;
-  return AEC_WrapLineEnd(ciOut);
-}
+{}(*
+function AEC_CharAtIndex(var ciChar: TAECHARINDEX): Integer;
+begin
+  if ciChar.nCharInLine >= ciChar.lpLine.nLineLen then
+    if ciChar.lpLine.nLineBreak = AELB_WRAP then
+      Result := ciChar.lpLine.next.wpLine[0]
+    else
+      Result := -ciChar.lpLine.nLineBreak
+  else
+    Result := ciChar.lpLine.wpLine[ciChar.nCharInLine];
+end;
 
 int AEC_CharAtIndex(const AECHARINDEX *ciChar)
 {
@@ -7368,69 +7381,71 @@ int AEC_CharAtIndex(const AECHARINDEX *ciChar)
   return ciChar->lpLine->wpLine[ciChar->nCharInLine];
 }
 
-BOOL AEC_IsCharInSelection(const AECHARINDEX *ciChar)
-{
-  if (ciChar->lpLine->nSelStart <= ciChar->nCharInLine && ciChar->nCharInLine < ciChar->lpLine->nSelEnd)
-    return TRUE;
-  return FALSE;
-}
-
-BOOL AEC_IsFirstCharInLine(const AECHARINDEX *ciChar)
-{
-  if (ciChar->nCharInLine == 0 && (!ciChar->lpLine->prev || ciChar->lpLine->prev->nLineBreak != AELB_WRAP))
-    return TRUE;
-  return FALSE;
-}
-
-BOOL AEC_IsLastCharInLine(const AECHARINDEX *ciChar)
-{
-  if (ciChar->nCharInLine == ciChar->lpLine->nLineLen && ciChar->lpLine->nLineBreak != AELB_WRAP)
-    return TRUE;
-  return FALSE;
-}
-
-AEFOLD* AEC_NextFold(AEFOLD *lpFold, BOOL bRecursive)
-{
-  if (lpFold)
-  {
-    if (bRecursive)
-    {
-      if (lpFold->firstChild)
-        return lpFold->firstChild;
-    }
-
-    do
-    {
-      if (lpFold->next)
-        return lpFold->next;
-    }
-    while (lpFold=lpFold->parent);
-  }
-  return lpFold;
-}
-
-AEFOLD* AEC_PrevFold(AEFOLD *lpFold, BOOL bRecursive)
-{
-  if (lpFold)
-  {
-    if (bRecursive)
-    {
-      if (lpFold->lastChild)
-        return lpFold->lastChild;
-    }
-
-    do
-    {
-      if (lpFold->prev)
-        return lpFold->prev;
-    }
-    while (lpFold=lpFold->parent);
-  }
-  return lpFold;
-}
-
-
 *)
 
+function AEC_IsCharInSelection(var ciChar: TAECHARINDEX): Boolean;
+begin
+  Result :=
+    (ciChar.lpLine.nSelStart <= ciChar.nCharInLine) and
+    (ciChar.nCharInLine < ciChar.lpLine.nSelEnd);
+end;
+
+function AEC_IsFirstCharInLine(var ciChar: TAECHARINDEX): Boolean;
+begin
+  Result :=
+    (ciChar.nCharInLine = 0) and
+    ((ciChar.lpLine.prev <> nil) or (ciChar.lpLine.prev.nLineBreak <> AELB_WRAP));
+end;
+
+function AEC_IsLastCharInLine(var ciChar: TAECHARINDEX): Boolean;
+begin
+  Result :=
+    (ciChar.nCharInLine = ciChar.lpLine.nLineLen) and
+    (ciChar.lpLine.nLineBreak <> AELB_WRAP);
+end;
+
+function AEC_NextFold(var lpFold: PAEFOLD; bRecursive: Boolean): PAEFOLD;
+begin
+  if lpFold <> nil then
+  begin
+    if bRecursive then
+      if lpFold.firstChild <> nil then
+      begin
+        Result := lpFold.firstChild;
+        Exit;
+      end;
+    repeat
+      if lpFold.next <> nil then
+      begin
+        Result := lpFold.next;
+        Exit;
+      end;
+      lpFold := lpFold.parent;
+    until lpFold = nil;
+  end;
+  Result := lpFold;
+end;
+
+function AEC_PrevFold(var lpFold: PAEFOLD; bRecursive: Boolean): PAEFOLD;
+begin
+  if lpFold <> nil then
+  begin
+    if bRecursive then
+      if lpFold.lastChild <> nil then
+      begin
+        Result := lpFold.lastChild;
+        Exit;
+      end;
+    repeat
+      if lpFold.prev <> nil then
+      begin
+        Result := lpFold.prev;
+        Exit;
+      end;
+      lpFold := lpFold.parent;
+    until lpFold = nil;
+  end;
+  Result := lpFold;
+end;
 
 end.

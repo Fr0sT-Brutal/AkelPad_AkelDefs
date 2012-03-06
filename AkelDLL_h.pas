@@ -1,5 +1,10 @@
 (*************************************************************************
 
+=========  AkelPad text editor plugin API ===========
+=========    Akel API version : 1.6.0.7   ===========
+
+** Origin: AkelDLL.h located at
+   http://akelpad.cvs.sourceforge.net/akelpad/akelpad_4/AkelFiles/Plugs/AkelDLL/AkelDLL.h
 ** Converted with C to Pascal Converter 2.0
 ** Release: 2.20.11.2011
 ** Email: al_gun@ncable.net.au
@@ -7,7 +12,6 @@
 ** Blogs: http://delphiprogrammingwithalgun.blogspot.com/
 ** Copyright (c) 2005, 2011 Ural Gunaydin (a.k.a. Al Gun)
 
-===========      Akel API version : 1.6.0.6     ===========
 ===========           Edited by Fr0sT           ===========
 = Tested on RAD Studio 2010 but compiles on D7 and should =
 = work on other versions also.                            =
@@ -27,7 +31,7 @@ function MakeIdentifier(a, b, c, d: ShortInt): DWORD;
 function AkelDLL: DWORD;
 {$EXTERNALSYM AkelDLL}
 
-const AkelDLLVer: array[1..4] of Byte = (1, 6, 0, 6);
+const AkelDLLVer: array[1..4] of Byte = (1, 6, 0, 7);
 {$EXTERNALSYM AkelDLLVer}
 
 //// Defines
@@ -280,6 +284,8 @@ const MI_PLUGINSSTACK = 4;    //Return: copied bytes. (HSTACK *)lParam - buffer 
 {$EXTERNALSYM MI_PLUGINSSTACK}
 const MI_SAVESETTINGS = 5;    //Return: see SS_ * defines.
 {$EXTERNALSYM MI_SAVESETTINGS}
+const MI_WNDPROGRESS = 10;   //Return: progress bar window handle.
+{$EXTERNALSYM MI_WNDPROGRESS}
 const MI_WNDSTATUS = 11;   //Return: status bar window handle.
 {$EXTERNALSYM MI_WNDSTATUS}
 const MI_WNDMDICLIENT = 12;   //Return: MDI client window handle.
@@ -620,10 +626,12 @@ const NEWLINE_MAC = 3;  //MacOS new line format (\r).
 {$EXTERNALSYM NEWLINE_MAC}
 
 //AKD_GOTO type
-const GT_LINE = $1;
+const GT_LINE = $1;           //Go to "Line:Column".
 {$EXTERNALSYM GT_LINE}
-const GT_OFFSET = $2;
-{$EXTERNALSYM GT_OFFSET}
+const GT_OFFSETBYTE = $2;     //Go to offset counted in bytes.
+{$EXTERNALSYM GT_OFFSETBYTE}
+const GT_OFFSETCHAR = $4;
+{$EXTERNALSYM GT_OFFSETCHAR}  //Go to offset counted in characters (not present in "Go to..." dialog).
 
 //Caret options
 const CO_CARETOUTEDGE = $00000001;  //Allow caret moving out of the line edge.
@@ -1416,6 +1424,7 @@ type
     dwLangID: DWORD;         //Codepage recognition language defined as LANGID. If -1, then use current settings.
     pText: PAnsiChar;        //Ansi text.
     nTextLen: INT_PTR;       //Text length. If this value is -1, the string is assumed to be null-terminated and the length is calculated automatically.
+    nMinChars: INT_PTR;      //Minimum detect characters representation. If zero, default number is used.
     nCodePage: Integer;      //Result: detected Ansi codepage.
   end;
   TDETECTANSITEXT = _DETECTANSITEXT;
@@ -1427,6 +1436,7 @@ type
     dwLangID: DWORD;         //Codepage recognition language defined as LANGID. If -1, then use current settings.
     wpText: PWideChar;       //Unicode text.
     nTextLen: INT_PTR;       //Text length. If this value is -1, the string is assumed to be null-terminated and the length is calculated automatically.
+    nMinChars: INT_PTR;      //Minimum detect characters representation. If zero, default number is used.
     nCodePageFrom: Integer;  //Result: codepage that converts text to Ansi without character lost.
     nCodePageTo: Integer;    //Result: detected Ansi codepage.
   end;
@@ -3725,6 +3735,7 @@ Example:
  dat.dwLangID=(DWORD)-1;
  dat.pText="\x91\x20\xE7\xA5\xA3\xAE\x20\xAD\xA0\xE7\xA8\xAD\xA0\xA5\xE2\xE1\xEF\x20\x90\xAE\xA4\xA8\xAD\xA0";
  dat.nTextLen=-1;
+ dat.nMinChars=0;
  SendMessage(hMainWnd, AKD_DETECTANSITEXT, 0, (LPARAM)&dat);
 
 
@@ -3746,6 +3757,7 @@ Example:
  dut.dwLangID=(DWORD)-1;
  dut.wpText=L"\x2018\x0020\x0437\x0490\x0408\x00AE\x0020\x00AD\x00A0\x0437\x0401\x00AD\x00A0\x0490\x0432\x0431\x043F\x0020\x0452\x00AE\x00A4\x0401\x00AD\x00A0";
  dut.nTextLen=-1;
+ dut.nMinChars=0;
  SendMessage(hMainWnd, AKD_DETECTUNITEXT, 0, (LPARAM)&dut);
 
 
@@ -5763,7 +5775,7 @@ Retrieves a specified range of characters from a AkelEdit control.
 (EXGETTEXTRANGE * )lParam == pointer to a EXGETTEXTRANGE structure.
 
 Return Value
- Text length in TCHARs. Without null character if EXGETTEXTRANGE.pText member is not NULL or including null character if EXGETTEXTRANGE.pText member is NULL.
+ Text length in TCHARs.
 
 Example (bOldWindows == FALSE):
  EXGETTEXTRANGE tr;
