@@ -7019,7 +7019,7 @@ function AEC_WrapLineBegin(var ciChar: TAECHARINDEX): Integer;
 function AEC_WrapLineEnd(var ciChar: TAECHARINDEX): Integer;
 function AEC_WrapLineBeginEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): Integer;
 function AEC_WrapLineEndEx(const ciIn: TAECHARINDEX; var ciOut: TAECHARINDEX): Integer;
-//int AEC_CharAtIndex(const AECHARINDEX *ciChar)
+function AEC_CharAtIndex(var ciChar: TAECHARINDEX): Integer;
 function AEC_IsCharInSelection(var ciChar: TAECHARINDEX): Boolean;
 function AEC_IsFirstCharInLine(var ciChar: TAECHARINDEX): Boolean;
 function AEC_IsLastCharInLine(var ciChar: TAECHARINDEX): Boolean;
@@ -7358,30 +7358,17 @@ begin
   Result := AEC_WrapLineEnd(ciOut);
 end;
 
-{}(*
+// Fr0sT: Returns WideChar if >= 0 and line break type if < 0
 function AEC_CharAtIndex(var ciChar: TAECHARINDEX): Integer;
 begin
   if ciChar.nCharInLine >= ciChar.lpLine.nLineLen then
     if ciChar.lpLine.nLineBreak = AELB_WRAP then
-      Result := ciChar.lpLine.next.wpLine[0]
+      Result := Integer(ciChar.lpLine.next.wpLine^)
     else
       Result := -ciChar.lpLine.nLineBreak
   else
-    Result := ciChar.lpLine.wpLine[ciChar.nCharInLine];
+    Result := Integer( (ciChar.lpLine.wpLine + ciChar.nCharInLine)^ );
 end;
-
-int AEC_CharAtIndex(const AECHARINDEX *ciChar)
-{
-  if (ciChar->nCharInLine >= ciChar->lpLine->nLineLen)
-  {
-    if (ciChar->lpLine->nLineBreak == AELB_WRAP)
-      return ciChar->lpLine->next->wpLine[0];
-    return -ciChar->lpLine->nLineBreak;
-  }
-  return ciChar->lpLine->wpLine[ciChar->nCharInLine];
-}
-
-*)
 
 function AEC_IsCharInSelection(var ciChar: TAECHARINDEX): Boolean;
 begin
