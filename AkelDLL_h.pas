@@ -5915,6 +5915,67 @@ type
   {$EXTERNALSYM TCREATEWINDOW}
 {$endif}
 
+// Parameters for current call are kept in the following form:
+//   pd.lParam - pointer to array of INT_PTR (let's call it Params)
+//   Params[0] = size of the whole array in bytes including the 0-th element itself.
+//               So Length(Params) = Params[0] div SizeOf(INT_PTR), ParamCount = Length(Params) - 1
+//   Params[1] = pointer to parameter string OR the value of numerical parameter
+//   ...
+// WARNING. There's no way to distinguish what kind of parameter is passed so be careful
+
+{$IF CompilerVersion < 20} // ?
+  {*****************************************************************************
+    Usage for Delphi versions earlier than D2009
+    procedure Init(var pd: TPLUGINDATA);
+    var
+      AkelParams: PAkelParamArr;
+    begin
+      AkelParams := PAkelParamArr(pd.lParam);
+      if AkelParams_Count(AkelParams) > 0 then
+        sParam := AkelParams_ParamStr(AkelParams, 0); // returns empty string if parameter is NULL
+        ...
+    end;
+  *****************************************************************************}
+
+type
+  TAkelParamArr = array[0..$FFFF] of INT_PTR;
+  PAkelParamArr = ^TAkelParamArr;
+
+function AkelParams_Count(Params: PAkelParamArr): Integer;
+function AkelParams_ParamInt(Params: PAkelParamArr; Idx: Integer): INT_PTR;
+function AkelParams_ParamStr(Params: PAkelParamArr; Idx: Integer): string;
+
+{$ELSE}
+  {*****************************************************************************
+    Usage for Delphi versions D2009 and later
+    procedure Init(var pd: TPLUGINDATA);
+    var
+      AkelParams: TAkelParams;
+    begin
+      AkelParams.Init(Pointer(pd.lParam));
+      if AkelParams.Count > 0 then
+      begin
+        sParam := AkelParams.ParamStr(0); // returns empty string if parameter is NULL
+        ...
+    end;
+  *****************************************************************************}
+
+type
+  TAkelParams = record
+  strict private
+    type
+      TAkelParamArr = array[0..$FFFF] of INT_PTR;
+      PAkelParamArr = ^TAkelParamArr;
+    var
+      FParamArr: PAkelParamArr;
+  public
+    procedure Init(ParamArr: Pointer);
+    function Count: Integer;
+    function ParamStr(Idx: Integer): string;
+    function ParamInt(Idx: Integer): INT_PTR;
+  end;
+{$IFEND}
+
 implementation
 
 function MakeIdentifier(a, b, c, d: ShortInt): DWORD;
@@ -5926,5 +5987,58 @@ function AkelDLL: DWORD;
 begin
   Result := MakeIdentifier(AkelDLLVer[1], AkelDLLVer[2], AkelDLLVer[3], AkelDLLVer[4]);
 end;
+
+{$IF CompilerVersion < 20}
+
+function AkelParams_Count(Params: PAkelParamArr): Integer;
+begin
+  if Params = nil then
+    Result := 0
+  else
+    Result := Params^[0] div SizeOf(INT_PTR) - 1;
+end;
+
+function AkelParams_ParamInt(Params: PAkelParamArr; Idx: Integer): INT_PTR;
+begin
+  if (Idx >= AkelParams_Count(Params)) or (Idx < 0) then
+    Result := 0
+  else
+    Result := Params^[Idx + 1];
+end;
+
+function AkelParams_ParamStr(Params: PAkelParamArr; Idx: Integer): string;
+begin
+  Result := string(PChar(AkelParams_ParamInt(Params, Idx)));
+end;
+
+{$ELSE}
+
+procedure TAkelParams.Init(ParamArr: Pointer);
+begin
+  FParamArr := PAkelParamArr(ParamArr);
+end;
+
+function TAkelParams.Count: Integer;
+begin
+  if FParamArr = nil then
+    Result := 0
+  else
+    Result := FParamArr^[0] div SizeOf(INT_PTR) - 1;
+end;
+
+function TAkelParams.ParamInt(Idx: Integer): INT_PTR;
+begin
+  if (Idx >= Count) or (Idx < 0) then
+    Result := 0
+  else
+    Result := FParamArr^[Idx + 1];
+end;
+
+function TAkelParams.ParamStr(Idx: Integer): string;
+begin
+  Result := string(PChar(ParamInt(Idx)));
+end;
+
+{$IFEND}
 
 end.
