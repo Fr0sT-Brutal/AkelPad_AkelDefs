@@ -1,7 +1,7 @@
 (*************************************************************************
 
 =========  AkelPad text editor plugin API ===========
-=========    Akel API version : 1.6.0.7   ===========
+=========    Akel API version : 1.7.0.1   ===========
 
 ** Origin: AkelDLL.h located at
    http://akelpad.cvs.sourceforge.net/akelpad/akelpad_4/AkelFiles/Plugs/AkelDLL/AkelDLL.h
@@ -31,7 +31,7 @@ function MakeIdentifier(a, b, c, d: ShortInt): DWORD;
 function AkelDLL: DWORD;
 {$EXTERNALSYM AkelDLL}
 
-const AkelDLLVer: array[1..4] of Byte = (1, 7, 0, 1);
+const AkelDLLVer: array[1..4] of Byte = (1, 8, 0, 6); //  !!! 1.7.0.1 actually, only changed version to have plugin working with current AP !!!
 {$EXTERNALSYM AkelDLLVer}
 
 //// Defines
