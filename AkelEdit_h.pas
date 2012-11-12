@@ -7544,8 +7544,8 @@ begin
     if ciChar.lpLine.nLineBreak = AELB_WRAP then
     begin
       Result := Integer(ciChar.lpLine.next.wpLine^);
-      if AEC_IsHighSurrogate(Result) then
-        Result := AEC_ScalarFromSurrogate(Result, (ciChar.lpLine.next.wpLine + 1)^);
+      if AEC_IsHighSurrogate(WideChar(Result)) then
+        Result := AEC_ScalarFromSurrogate(WideChar(Result), (ciChar.lpLine.next.wpLine + 1)^);
       Exit;
     end
     else
@@ -7553,8 +7553,8 @@ begin
   else
   begin
     Result := Integer( (ciChar.lpLine.wpLine + ciChar.nCharInLine)^ );
-    if AEC_IsHighSurrogate(Result)
-      Result := AEC_ScalarFromSurrogate(Result, (ciChar.lpLine.next.wpLine + ciChar->nCharInLine + 1)^);
+    if AEC_IsHighSurrogate(WideChar(Result)) then
+      Result := AEC_ScalarFromSurrogate(WideChar(Result), (ciChar.lpLine.next.wpLine + ciChar.nCharInLine + 1)^);
     Exit;
   end;
 end;
