@@ -3,7 +3,7 @@
 =========  AkelPad text editor plugin API ===========
 
 ** Origin: AkelEdit.h located at
-   http://akelpad.cvs.sourceforge.net/akelpad_4/AkelFiles/Plugs/AkelDLL/AkelEdit.h
+   http://akelpad.cvs.sourceforge.net/viewvc/akelpad/akelpad_4/AkelFiles/Plugs/AkelDLL/AkelEdit.h
 ** Converted with C to Pascal Converter 2.0
 ** Release: 2.20.11.2011
 ** Email: al_gun@ncable.net.au
@@ -1444,6 +1444,7 @@ type
     nNewLine: Integer;            //[in]  See AELB_* defines.
     crSearch: TAECHARRANGE;       //[in]  Range of characters to search.
     crFound: TAECHARRANGE;        //[out] Range of characters in which text is found.
+    nCompileErrorOffset: INT_PTR; //[out] Contain pattern offset, if error occurred during compile pattern. Return when AEFR_REGEXP is set.
   end;
   TAEFINDTEXTA = _AEFINDTEXTA;
   {$EXTERNALSYM TAEFINDTEXTA}
@@ -1457,6 +1458,7 @@ type
     nNewLine: Integer;            //[in]  See AELB_* defines.
     crSearch: TAECHARRANGE;       //[in]  Range of characters to search.
     crFound: TAECHARRANGE;        //[out] Range of characters in which text is found.
+    nCompileErrorOffset: INT_PTR; //[out] Contain pattern offset, if error occurred during compile pattern. Return when AEFR_REGEXP is set.
   end;
   TAEFINDTEXTW = _AEFINDTEXTW;
   {$EXTERNALSYM TAEFINDTEXTW}
@@ -3600,6 +3602,7 @@ Return Value
  FALSE virtual-key not processed.
 
 Remarks
+ To emulate VK_RETURN key use WM_CHAR message.
  To emulate VK_TAB key use it with AEMOD_CONTROL modifier.
 
 Example:

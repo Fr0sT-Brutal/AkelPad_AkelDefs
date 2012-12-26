@@ -1,10 +1,10 @@
 (*************************************************************************
 
 =========  AkelPad text editor plugin API ===========
-=========    Akel API version : 1.8.0.6   ===========
+=========    Akel API version : 1.8.0.8   ===========
 
 ** Origin: AkelDLL.h located at
-   http://akelpad.cvs.sourceforge.net/akelpad/akelpad_4/AkelFiles/Plugs/AkelDLL/AkelDLL.h
+   http://akelpad.cvs.sourceforge.net/viewvc/akelpad/akelpad_4/AkelFiles/Plugs/AkelDLL/AkelDLL.h
 ** Converted with C to Pascal Converter 2.0
 ** Release: 2.20.11.2011
 ** Email: al_gun@ncable.net.au
@@ -1338,6 +1338,8 @@ type
     cb: DWORD;                         //Size of the structure.
     dwSupport: DWORD;                  //If (dwSupport & PDS_GETSUPPORT) != 0, then caller wants to get PDS_* flags without function execution.
     pFunction: PBYTE;                  //Called cFunction name, format "Plugin::cFunction".
+                                       //  const char *pFunction     if bOldWindows == TRUE
+                                       //  const wchar_t *pFunction  if bOldWindows == FALSE
     szFunction: PAnsiChar;             //Called cFunction name (Ansi).
     wszFunction: PWideChar;            //Called cFunction name (Unicode).
     hInstanceDLL: HINST;               //DLL instance.
@@ -1345,8 +1347,12 @@ type
     nUnload: Integer;                  //See UD_* defines.
     bInMemory: BOOL;                   //Plugin already loaded.
     bOnStart: BOOL;                    //Indicates when function has been called:
+                                       //  TRUE  if function called on start-up.
+                                       //  FALSE if function called manually.
     lParam: LPARAM;                    //Input data.
     pAkelDir: PBYTE;                   //AkelPad directory.
+                                       //  const char *pAkelDir      if bOldWindows == TRUE
+                                       //  const wchar_t *pAkelDir   if bOldWindows == FALSE
     szAkelDir: PAnsiChar;              //AkelPad directory (Ansi).
     wszAkelDir: PWideChar;             //AkelPad directory (Unicode).
     hInstanceEXE: HINST;               //EXE instance.
@@ -1371,6 +1377,8 @@ type
     bAkelEdit: BOOL;                   //AkelEdit control is used.
     nMDI: Integer;                     //Window mode, see WMD_* defines.
     pLangModule: PBYTE;                //Language module.
+                                       //  const char *pLangModule      if bOldWindows == TRUE
+                                       //  const wchar_t *pLangModule   if bOldWindows == FALSE
     szLangModule: PAnsiChar;           //Language module (Ansi).
     wszLangModule: PWideChar;          //Language module (Unicode).
     wLangSystem: LANGID;               //System language ID.
@@ -1834,6 +1842,45 @@ type
 
 
 type
+  PINIKEY = ^TINIKEY;
+  _INIKEY = record
+    next: PINIKEY;
+    prev: PINIKEY;
+    wszKey: PWideChar;
+    nKeyBytes: Integer;
+    wszString: PWideChar;
+    nStringBytes: Integer;
+  end;
+  TINIKEY = _INIKEY;
+  {$EXTERNALSYM _INIKEY}
+
+
+type
+  PINISECTION = ^TINISECTION;
+  _INISECTION = record
+    next: PINISECTION;
+    prev: PINISECTION;
+    hIniFile: THandle;
+    wszSection: PWideChar;
+    nSectionBytes: Integer;
+    first: PINIKEY;
+    las: PINIKEY;
+  end;
+  TINISECTION = _INISECTION;
+  {$EXTERNALSYM _INISECTION}
+
+
+type
+  _INIFILE = record
+    first: PINISECTION;
+    last: PINISECTION;
+    bModified: BOOL;
+  end;
+  TINIFILE = _INIFILE;
+  {$EXTERNALSYM _INIFILE}
+
+
+type
   _GETTEXTRANGE = record
     cpMin: INT_PTR;              //First character in the range. First char of text: 0.
     cpMax: INT_PTR;              //Last character in the range. Last char of text: -1.
@@ -1871,6 +1918,7 @@ type
   end;
   TRECENTFILE = _RECENTFILE;
   {$EXTERNALSYM _RECENTFILE}
+
 
 type
   _RECENTFILESTACK = record
@@ -2661,7 +2709,7 @@ const IDM_WINDOW_MDILIST = 4327;  //Select window dialog (MDI). Same as IDM_SELE
                                               //
 const IDM_WINDOW_CHANGESIZE = 4331;  //Change style of the main window SW_RESTORE\SW_MAXIMIZE.
 {$EXTERNALSYM IDM_WINDOW_CHANGESIZE}
-                                              //Return Value: zero.
+                                              //Return Value: SW_RESTORE - new style is SW_RESTORE, SW_MAXIMIZE - new style is SW_MAXIMIZE.
                                               //
 const IDM_WINDOW_DLGNEXT = 4332;  //Activate next dialog window.
 {$EXTERNALSYM IDM_WINDOW_DLGNEXT}
@@ -4072,7 +4120,10 @@ Finds text in a edit control.
 (TEXTFIND * )lParam == pointer to a TEXTFIND structure.
 
 Return Value
- Character position of the next match. If there are no more matches, the return value is �1.
+ Character position of the next match.
+ If there are no more matches, the return value is –1.
+ If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (–100 - PatternOffset).
+ For example, TEXTFINDW.pFindIt equal to "ab[c", syntax error in third symbol, return value is –102.
 
 Example (Unicode):
  TEXTFINDW tf;
@@ -4092,7 +4143,10 @@ Replaces text in a edit control.
 (TEXTREPLACE * )lParam == pointer to a TEXTREPLACE structure.
 
 Return Value
- Character position of the next match. If there are no more matches, the return value is �1.
+ Character position of the next match.
+ If there are no more matches, the return value is –1.
+ If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (–100 - PatternOffset).
+ For example, TEXTREPLACEW.pFindIt equal to "ab[c", syntax error in third symbol, return value is –102.
 
 Example (Unicode):
  TEXTREPLACEW tr;
@@ -5062,7 +5116,7 @@ Call dll.
                             or pointer to a PLUGINCALLPOST, allocated with GlobalAlloc, if PostMessage used.
 
 Return Value
- See EDL_* defines.
+ See UD_* defines.
 
 Example SendMessage (Unicode):
  PLUGINCALLSENDW pcs;
@@ -5345,7 +5399,7 @@ Opens ini file.
 (const unsigned char * )lParam == ini file.
 
 Return Value
- HINIFILE.
+ HINIFILE. For direct access use pointer to INIFILE structure.
 
 Example read (bOldWindows == TRUE):
  INIVALUEA iv;
@@ -5425,7 +5479,7 @@ Retrieve ini section handle.
 (const unsigned char * )lParam == section name.
 
 Return Value
- HINISECTION.
+ HINISECTION. For direct access use pointer to INISECTION structure.
 
 Example (bOldWindows == TRUE):
  HINISECTION hIniSection;
@@ -5490,7 +5544,7 @@ Retrieve key handle.
 (const unsigned char * )lParam == key name.
 
 Return Value
- HINIKEY.
+ HINIKEY. For direct access use pointer to INIKEY structure.
 
 Example (bOldWindows == TRUE):
  HINISECTION hIniSection;

@@ -8,7 +8,7 @@
   #define MAKE_IDENTIFIER(a, b, c, d)  ((DWORD)MAKELONG(MAKEWORD(a, b), MAKEWORD(c, d)))
 #endif
 
-#define AKELDLL MAKE_IDENTIFIER(1, 8, 0, 6)
+#define AKELDLL MAKE_IDENTIFIER(1, 8, 0, 8)
 
 
 //// Defines
@@ -1179,6 +1179,31 @@ typedef struct {
   DWORD dwData;                  //Data size in bytes.
 } INIVALUEW;
 
+typedef struct _INIKEY {
+  struct _INIKEY *next;
+  struct _INIKEY *prev;
+  wchar_t *wszKey;
+  int nKeyBytes;
+  wchar_t *wszString;
+  int nStringBytes;
+} INIKEY;
+
+typedef struct _INISECTION {
+  struct _INISECTION *next;
+  struct _INISECTION *prev;
+  HANDLE hIniFile;
+  wchar_t *wszSection;
+  int nSectionBytes;
+  INIKEY *first;
+  INIKEY *last;
+} INISECTION;
+
+typedef struct {
+  INISECTION *first;
+  INISECTION *last;
+  BOOL bModified;
+} INIFILE;
+
 typedef struct {
   INT_PTR cpMin;              //First character in the range. First char of text: 0.
   INT_PTR cpMax;              //Last character in the range. Last char of text: -1.
@@ -1793,7 +1818,7 @@ typedef struct {
                                               //Return Value: zero.
                                               //
 #define IDM_WINDOW_CHANGESIZE           4331  //Change style of the main window SW_RESTORE\SW_MAXIMIZE.
-                                              //Return Value: zero.
+                                              //Return Value: SW_RESTORE - new style is SW_RESTORE, SW_MAXIMIZE - new style is SW_MAXIMIZE.
                                               //
 #define IDM_WINDOW_DLGNEXT              4332  //Activate next dialog window.
                                               //Return Value: activated dialog handle.
@@ -3002,7 +3027,10 @@ Finds text in a edit control.
 (TEXTFIND *)lParam == pointer to a TEXTFIND structure.
 
 Return Value
- Character position of the next match. If there are no more matches, the return value is –1.
+ Character position of the next match.
+ If there are no more matches, the return value is –1.
+ If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (–100 - PatternOffset).
+ For example, TEXTFINDW.pFindIt equal to "ab[c", syntax error in third symbol, return value is –102.
 
 Example (Unicode):
  TEXTFINDW tf;
@@ -3022,7 +3050,10 @@ Replaces text in a edit control.
 (TEXTREPLACE *)lParam == pointer to a TEXTREPLACE structure.
 
 Return Value
- Character position of the next match. If there are no more matches, the return value is –1.
+ Character position of the next match.
+ If there are no more matches, the return value is –1.
+ If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (–100 - PatternOffset).
+ For example, TEXTREPLACEW.pFindIt equal to "ab[c", syntax error in third symbol, return value is –102.
 
 Example (Unicode):
  TEXTREPLACEW tr;
@@ -3992,7 +4023,7 @@ Call dll.
                             or pointer to a PLUGINCALLPOST, allocated with GlobalAlloc, if PostMessage used.
 
 Return Value
- See EDL_* defines.
+ See UD_* defines.
 
 Example SendMessage (Unicode):
  PLUGINCALLSENDW pcs;
@@ -4275,7 +4306,7 @@ Opens ini file.
 (const unsigned char *)lParam == ini file.
 
 Return Value
- HINIFILE.
+ HINIFILE. For direct access use pointer to INIFILE structure.
 
 Example read (bOldWindows == TRUE):
  INIVALUEA iv;
@@ -4355,7 +4386,7 @@ Retrieve ini section handle.
 (const unsigned char *)lParam == section name.
 
 Return Value
- HINISECTION.
+ HINISECTION. For direct access use pointer to INISECTION structure.
 
 Example (bOldWindows == TRUE):
  HINISECTION hIniSection;
@@ -4420,7 +4451,7 @@ Retrieve key handle.
 (const unsigned char *)lParam == key name.
 
 Return Value
- HINIKEY.
+ HINIKEY. For direct access use pointer to INIKEY structure.
 
 Example (bOldWindows == TRUE):
  HINISECTION hIniSection;
