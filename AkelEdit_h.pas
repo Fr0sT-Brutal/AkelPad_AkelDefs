@@ -344,6 +344,8 @@ const AECO_LBUTTONUPCONTINUECAPTURE = $00020000;  //After WM_LBUTTONUP message c
 {$EXTERNALSYM AECO_LBUTTONUPCONTINUECAPTURE}
 const AECO_RBUTTONDOWNMOVECARET = $00040000;  //WM_RBUTTONDOWN message moves caret to a click position.
 {$EXTERNALSYM AECO_RBUTTONDOWNMOVECARET}
+const AECO_MARGINSELUNWRAPLINE = $00080000;  //Left margin line selection with mouse selects all wrapped line.
+{$EXTERNALSYM AECO_MARGINSELUNWRAPLINE}
 const AECO_LOCKSELECTION = $00100000;  //Prevent selection changing. Use it with AECO_READONLY flag.
 {$EXTERNALSYM AECO_LOCKSELECTION}
 const AECO_NOMARGINSEL = $00200000;  //Disables left margin line selection with mouse.
@@ -2704,7 +2706,7 @@ AEN_HSCROLL
 ___________
 
 Notification message sends in the form of a WM_NOTIFY message.
-Sends to the parent window procedure before an edit control window scrolled horizontally.
+Sends to the parent window procedure before an edit control window scrolled vertically.
 
 (int)wParam         == specifies the control identifier.
 (AENSCROLL * )lParam == pointer to a AENSCROLL structure.
@@ -7189,6 +7191,8 @@ function AEC_CharAtIndex(var ciChar: TAECHARINDEX): Integer;
 function AEC_IsCharInSelection(var ciChar: TAECHARINDEX): Boolean;
 function AEC_IsFirstCharInLine(var ciChar: TAECHARINDEX): Boolean;
 function AEC_IsLastCharInLine(var ciChar: TAECHARINDEX): Boolean;
+function AEC_IsFirstCharInFile(var ciChar: TAECHARINDEX): Boolean;
+function AEC_IsLastCharInFile(var ciChar: TAECHARINDEX): Boolean;
 function AEC_NextFold(var lpFold: PAEFOLD; bRecursive: Boolean): PAEFOLD;
 function AEC_PrevFold(var lpFold: PAEFOLD; bRecursive: Boolean): PAEFOLD;
 
@@ -7581,6 +7585,20 @@ begin
   Result :=
     (ciChar.nCharInLine = ciChar.lpLine.nLineLen) and
     (ciChar.lpLine.nLineBreak <> AELB_WRAP);
+end;
+
+function AEC_IsFirstCharInFile(var ciChar: TAECHARINDEX): Boolean;
+begin
+  Result :=
+    (ciChar.nCharInLine = 0) and
+    (ciChar.lpLine.prev <> nil);
+end;
+
+function AEC_IsLastCharInFile(var ciChar: TAECHARINDEX): Boolean;
+begin
+  Result :=
+    (ciChar.nCharInLine = ciChar.lpLine.nLineLen) and
+    (ciChar.lpLine.next <> nil);
 end;
 
 function AEC_NextFold(var lpFold: PAEFOLD; bRecursive: Boolean): PAEFOLD;

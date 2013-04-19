@@ -32,7 +32,7 @@ function MakeIdentifier(a, b, c, d: ShortInt): DWORD;
 function AkelDLL: DWORD;
 {$EXTERNALSYM AkelDLL}
 
-const AkelDLLVer: array[1..4] of Byte = (1, 8, 0, 6);
+const AkelDLLVer: array[1..4] of Byte = (1, 8, 0, 8);
 {$EXTERNALSYM AkelDLLVer}
 
 //// Defines
@@ -369,6 +369,8 @@ const MI_DATEINSERTFORMAT = 130;  //Return: copied chars. (wchar_t *)lParam - bu
 {$EXTERNALSYM MI_DATEINSERTFORMAT}
 const MI_AKELUPDATEROPTIONS = 131;  //Return: copied chars. (wchar_t *)lParam - buffer that receives "AkelUpdaterOptions" string.
 {$EXTERNALSYM MI_AKELUPDATEROPTIONS}
+const MI_URLCOMMAND = 132;  //Return: copied chars. (wchar_t *)lParam - buffer that receives "UrlCommand" string.
+{$EXTERNALSYM MI_URLCOMMAND}
 
 //Menu
 const MI_ONTOP = 141;  //Return: always on top (on\off).
@@ -399,8 +401,12 @@ const MI_DEFAULTCODEPAGE = 177;  //Return: default codepage.
 {$EXTERNALSYM MI_DEFAULTCODEPAGE}
 const MI_DEFAULTBOM = 178;  //Return: default BOM.
 {$EXTERNALSYM MI_DEFAULTBOM}
-const MI_DEFAULTNEWLINE = 179;  //Return: default new line, see NEWLINE_ * defines.
-{$EXTERNALSYM MI_DEFAULTNEWLINE}
+const MI_NEWFILECODEPAGE = 179;  //Return: new file codepage.
+{$EXTERNALSYM MI_NEWFILECODEPAGE}
+const MI_NEWFILEBOM = 180;  //Return: new file BOM.
+{$EXTERNALSYM MI_NEWFILEBOM}
+const MI_NEWFILENEWLINE = 181;  //Return: new file new line, see NEWLINE_* defines.
+{$EXTERNALSYM MI_NEWFILENEWLINE}
 const MI_LANGCODEPAGERECOGNITION = 183;  //Return: codepage recognition language defined as LANGID.
 {$EXTERNALSYM MI_LANGCODEPAGERECOGNITION}
 const MI_CODEPAGERECOGNITIONBUFFER = 184;  //Return: size of codepage recognition buffer.
@@ -675,6 +681,8 @@ const MO_NONEWLINEMOUSESELECT = $00000010;  //Triple click and left margin click
 {$EXTERNALSYM MO_NONEWLINEMOUSESELECT}
 const MO_NOWHEELFONTCHANGE = $00000020;  //Don't change font size with middle button scroll and Ctrl key.
 {$EXTERNALSYM MO_NOWHEELFONTCHANGE}
+const MO_MARGINSELUNWRAPLINE = $00000040;  //Left margin line selection with mouse selects all wrapped line.
+{$EXTERNALSYM MO_MARGINSELUNWRAPLINE}
 
 //Keyboard layout options
 const KLO_REMEMBERLAYOUT = $00000001;  //Remember keyboard layout for each tab (MDI).
@@ -1893,7 +1901,7 @@ type
 type
   _EXGETTEXTRANGE = record
     cr: TAECHARRANGE;             //Characters range to retrieve.
-    bColumnSel: BOOL;            //Column selection. If this value is �1, active column selection mode is used.
+    bColumnSel: BOOL;            //Column selection. If this value is –1, active column selection mode is used.
     pText: PByte;       //Pointer that receive allocated text.
     nNewLine: Integer;               //See AELB_* defines.
     nCodePage: Integer;              //Valid if bOldWindows == TRUE. Code page identifier (any available in the system). You can also specify one of the following values: CP_ACP - ANSI code page, CP_OEMCP - OEM code page, CP_UTF8 - UTF-8 code page.
@@ -2388,11 +2396,11 @@ const IDM_EDIT_FIND = 4158;  //Find dialog.
                                               //
 const IDM_EDIT_FINDNEXTDOWN = 4159;  //Find last string down.
 {$EXTERNALSYM IDM_EDIT_FINDNEXTDOWN}
-                                              //Return Value: Character position of the next match. If there are no more matches, the return value is �1.
+                                              //Return Value: Character position of the next match. If there are no more matches, the return value is –1.
                                               //
 const IDM_EDIT_FINDNEXTUP = 4160;  //Find last string up.
 {$EXTERNALSYM IDM_EDIT_FINDNEXTUP}
-                                              //Return Value: Character position of the next match. If there are no more matches, the return value is �1.
+                                              //Return Value: Character position of the next match. If there are no more matches, the return value is –1.
                                               //
 const IDM_EDIT_REPLACE = 4161;  //Replace dialog.
 {$EXTERNALSYM IDM_EDIT_REPLACE}
@@ -4121,9 +4129,9 @@ Finds text in a edit control.
 
 Return Value
  Character position of the next match.
- If there are no more matches, the return value is –1.
- If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (–100 - PatternOffset).
- For example, TEXTFINDW.pFindIt equal to "ab[c", syntax error in third symbol, return value is –102.
+ If there are no more matches, the return value is вЂ“1.
+ If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (вЂ“100 - PatternOffset).
+ For example, TEXTFINDW.pFindIt equal to "ab[c", syntax error in third symbol, return value is вЂ“102.
 
 Example (Unicode):
  TEXTFINDW tf;
@@ -4144,9 +4152,9 @@ Replaces text in a edit control.
 
 Return Value
  Character position of the next match.
- If there are no more matches, the return value is –1.
- If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (–100 - PatternOffset).
- For example, TEXTREPLACEW.pFindIt equal to "ab[c", syntax error in third symbol, return value is –102.
+ If there are no more matches, the return value is вЂ“1.
+ If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (вЂ“100 - PatternOffset).
+ For example, TEXTREPLACEW.pFindIt equal to "ab[c", syntax error in third symbol, return value is вЂ“102.
 
 Example (Unicode):
  TEXTREPLACEW tr;
