@@ -244,6 +244,8 @@ const AEPTF_NOTIFYDELETE = $00000010;  //Don't use it. For internal code only.
 {$EXTERNALSYM AEPTF_NOTIFYDELETE}
 const AEPTF_NOTIFYINSERT = $00000020;  //Don't use it. For internal code only.
 {$EXTERNALSYM AEPTF_NOTIFYINSERT}
+const AEPTF_VALIDLINE = $00000040;  //Don't use it. For internal code only.
+{$EXTERNALSYM AEPTF_VALIDLINE}
 const AEPTF_FOLD = $00000100;  //If set, AEPOINT.ciPoint index is used in fold. AEPOINT.dwUserData is pointer to a AEFOLD structure.
 {$EXTERNALSYM AEPTF_FOLD}
 const AEPTF_MOVEOFFSET = $00001000;  //If set, AEPOINT.nPointOffset has been changed.
@@ -959,7 +961,9 @@ const AEFR_MATCHCASE = $00000004;  //Same as FR_MATCHCASE. If set, the search op
 {$EXTERNALSYM AEFR_MATCHCASE}
 const AEFR_REGEXP = $00080000;  //Regular expression search.
 {$EXTERNALSYM AEFR_REGEXP}
-const AEFR_REGEXPMINMATCH = $00100000;  //Allow zero length match at string edges. For example: "^" at the string beginning or "$" at the string ending.
+const AEFR_REGEXPNONEWLINEDOT = $00100000;  //Symbol . specifies any character except new line.
+{$EXTERNALSYM AEFR_REGEXPNONEWLINEDOT}
+const AEFR_REGEXPMINMATCH = $00200000;  //Allow zero length match at string edges. For example: "^" at the string beginning or "$" at the string ending.
 {$EXTERNALSYM AEFR_REGEXPMINMATCH}
 
 

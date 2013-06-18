@@ -1,7 +1,7 @@
 (*************************************************************************
 
 =========  AkelPad text editor plugin API ===========
-=========    Akel API version : 1.8.0.8   ===========
+=========    Akel API version : 1.9.0.1   ===========
 
 ** Origin: AkelDLL.h located at
    http://akelpad.cvs.sourceforge.net/viewvc/akelpad/akelpad_4/AkelFiles/Plugs/AkelDLL/AkelDLL.h
@@ -32,7 +32,7 @@ function MakeIdentifier(a, b, c, d: ShortInt): DWORD;
 function AkelDLL: DWORD;
 {$EXTERNALSYM AkelDLL}
 
-const AkelDLLVer: array[1..4] of Byte = (1, 8, 0, 8);
+const AkelDLLVer: array[1..4] of Byte = (1, 9, 0, 1);
 {$EXTERNALSYM AkelDLLVer}
 
 //// Defines
@@ -353,8 +353,6 @@ const MI_STATUSPOSTYPE = 111;  //Return: "StatusPosType" cType, see SPT_ * defin
 {$EXTERNALSYM MI_STATUSPOSTYPE}
 const MI_STATUSUSERFORMAT = 112;  //Return: copied chars. (wchar_t *)lParam - buffer that receives "StatusUserFormat" string.
 {$EXTERNALSYM MI_STATUSUSERFORMAT}
-const MI_STATUSUSERFLAGS = 113;  //Reserved.
-{$EXTERNALSYM MI_STATUSUSERFLAGS}
 const MI_WORDBREAKCUSTOM = 117;  //Return: "WordBreak" flags.
 {$EXTERNALSYM MI_WORDBREAKCUSTOM}
 const MI_PAINTOPTIONS = 121;  //Return: "PaintOptions" flags, see PAINT_ * defines.
@@ -463,6 +461,134 @@ const MI_LASTDIR = 281;  //Return: copied chars. (wchar_t *)lParam - buffer that
 {$EXTERNALSYM MI_LASTDIR}
 const MI_SHOWPLACESBAR = 282;  //Return: show places bar in open dialog (on\off).
 {$EXTERNALSYM MI_SHOWPLACESBAR}
+
+
+//AKD_SETMAININFO type
+
+//PLUGINDATA
+const MIS_SAVESETTINGS = 5;   //(int)lParam - see SS_* defines.
+{$EXTERNALSYM MIS_SAVESETTINGS}
+const MIS_MDI = 45;  //(int)lParam - window mode, see WMD_* defines. Required program restart.
+{$EXTERNALSYM MIS_MDI}
+const MIS_LANGMODULEA = 51;  //(char *)lParam - language module string. Required program restart.
+{$EXTERNALSYM MIS_LANGMODULEA}
+const MIS_LANGMODULEW = 52;  //(wchar_t *)lParam - language module string. Required program restart.
+{$EXTERNALSYM MIS_LANGMODULEW}
+//Manual
+const MIS_CMDLINEBEGIN = 105; //(wchar_t *)lParam - "CmdLineBegin" string.
+{$EXTERNALSYM MIS_CMDLINEBEGIN}
+const MIS_CMDLINEEND = 106; //(wchar_t *)lParam - "CmdLineEnd" string.
+{$EXTERNALSYM MIS_CMDLINEEND}
+const MIS_SHOWMODIFY = 110; //(DWORD)lParam - "ShowModify" flags, see SM_* defines.
+{$EXTERNALSYM MIS_SHOWMODIFY}
+const MIS_STATUSPOSTYPE = 111; //(DWORD)lParam - "StatusPosType" type, see SPT_* defines.
+{$EXTERNALSYM MIS_STATUSPOSTYPE}
+const MIS_STATUSUSERFORMAT = 112; //(wchar_t *)lParam - "StatusUserFormat" string.
+{$EXTERNALSYM MIS_STATUSUSERFORMAT}
+const MIS_WORDBREAKCUSTOM = 117; //(DWORD)lParam - "WordBreak" flags.
+{$EXTERNALSYM MIS_WORDBREAKCUSTOM}
+const MIS_PAINTOPTIONS = 121; //(DWORD)lParam - "PaintOptions" flags, see PAINT_* defines.
+{$EXTERNALSYM MIS_PAINTOPTIONS}
+const MIS_RICHEDITCLASS = 125; //(BOOL)lParam - "RichEditClass" type.
+{$EXTERNALSYM MIS_RICHEDITCLASS}
+const MIS_AKELADMINRESIDENT = 126; //(BOOL)lParam - AkelAdmin.exe resident - TRUE or unloaded immediately after execution - FALSE.
+{$EXTERNALSYM MIS_AKELADMINRESIDENT}
+const MIS_DATELOGFORMAT = 129; //(wchar_t *)lParam - "DateLogFormat" string.
+{$EXTERNALSYM MIS_DATELOGFORMAT}
+const MIS_DATEINSERTFORMAT = 130; //(wchar_t *)lParam - "DateInsertFormat" string.
+{$EXTERNALSYM MIS_DATEINSERTFORMAT}
+const MIS_AKELUPDATEROPTIONS = 131; //(wchar_t *)lParam - "AkelUpdaterOptions" string.
+{$EXTERNALSYM MIS_AKELUPDATEROPTIONS}
+const MIS_URLCOMMAND = 132; //(wchar_t *)lParam - "UrlCommand" string.
+{$EXTERNALSYM MIS_URLCOMMAND}
+//Menu
+const MIS_ONTOP = 141; //(BOOL)lParam - always on top (on\off).
+{$EXTERNALSYM MIS_ONTOP}
+const MIS_STATUSBAR = 142; //(BOOL)lParam - show statusbar (on\off).
+{$EXTERNALSYM MIS_STATUSBAR}
+const MIS_KEEPSPACE = 146; //(BOOL)lParam - keep left space (on\off).
+{$EXTERNALSYM MIS_KEEPSPACE}
+const MIS_WATCHFILE = 147; //(BOOL)lParam - watch file change (on\off).
+{$EXTERNALSYM MIS_WATCHFILE}
+const MIS_SAVETIME = 148; //(BOOL)lParam - save original file time (on\off).
+{$EXTERNALSYM MIS_SAVETIME}
+const MIS_SINGLEOPENFILE = 152; //(BOOL)lParam - single open file (on\off).
+{$EXTERNALSYM MIS_SINGLEOPENFILE}
+const MIS_SINGLEOPENPROGRAM = 153; //(BOOL)lParam - single open program (on\off).
+{$EXTERNALSYM MIS_SINGLEOPENPROGRAM}
+const MIS_TABOPTIONSMDI = 157; //(DWORD)lParam - tab flags, see TAB_* defines.
+{$EXTERNALSYM MIS_TABOPTIONSMDI}
+//Settings dialog
+const MIS_EXECUTECOMMAND = 171; //(wchar_t *)lParam - execution command string.
+{$EXTERNALSYM MIS_EXECUTECOMMAND}
+const MIS_EXECUTEDIRECTORY = 172; //(wchar_t *)lParam - execution directory string.
+{$EXTERNALSYM MIS_EXECUTEDIRECTORY}
+const MIS_CODEPAGELIST = 176; //(int *)lParam - array of codepages, last element in array is zero.
+{$EXTERNALSYM MIS_CODEPAGELIST}
+const MIS_DEFAULTCODEPAGE = 177; //(int)lParam - default codepage.
+{$EXTERNALSYM MIS_DEFAULTCODEPAGE}
+const MIS_DEFAULTBOM = 178; //(BOOL)lParam - default BOM.
+{$EXTERNALSYM MIS_DEFAULTBOM}
+const MIS_NEWFILECODEPAGE = 179; //(int)lParam - new file codepage.
+{$EXTERNALSYM MIS_NEWFILECODEPAGE}
+const MIS_NEWFILEBOM = 180; //(BOOL)lParam - new file BOM.
+{$EXTERNALSYM MIS_NEWFILEBOM}
+const MIS_NEWFILENEWLINE = 181; //(int)lParam - new file new line, see NEWLINE_* defines.
+{$EXTERNALSYM MIS_NEWFILENEWLINE}
+const MIS_LANGCODEPAGERECOGNITION = 183; //(DWORD)lParam - codepage recognition language defined as LANGID.
+{$EXTERNALSYM MIS_LANGCODEPAGERECOGNITION}
+const MIS_CODEPAGERECOGNITIONBUFFER = 184; //(DWORD)lParam - size of codepage recognition buffer.
+{$EXTERNALSYM MIS_CODEPAGERECOGNITIONBUFFER}
+const MIS_SAVEPOSITIONS = 192; //(BOOL)lParam - save recent file positions (on\off).
+{$EXTERNALSYM MIS_SAVEPOSITIONS}
+const MIS_SAVECODEPAGES = 193; //(BOOL)lParam - save recent file codepages (on\off).
+{$EXTERNALSYM MIS_SAVECODEPAGES}
+const MIS_RECENTFILES = 194; //(int)lParam - number of recent files.
+{$EXTERNALSYM MIS_RECENTFILES}
+const MIS_SEARCHSTRINGS = 198; //(int)lParam - number of search strings.
+{$EXTERNALSYM MIS_SEARCHSTRINGS}
+const MIS_FILETYPESOPEN = 202; //(wchar_t *)lParam - associated file types to open.
+{$EXTERNALSYM MIS_FILETYPESOPEN}
+const MIS_FILETYPESEDIT = 203; //(wchar_t *)lParam - associated file types to edit.
+{$EXTERNALSYM MIS_FILETYPESEDIT}
+const MIS_FILETYPESPRINT = 204; //(wchar_t *)lParam - associated file types to print.
+{$EXTERNALSYM MIS_FILETYPESPRINT}
+const MIS_FILETYPESASSOCIATED = 205; //(DWORD)lParam - associated file types, see FTA_* defines.
+{$EXTERNALSYM MIS_FILETYPESASSOCIATED}
+const MIS_KEYBLAYOUTOPTIONS = 209; //(DWORD)lParam - keyboard layout options, see KLO_* defines.
+{$EXTERNALSYM MIS_KEYBLAYOUTOPTIONS}
+const MIS_SILENTCLOSEEMPTYMDI = 213; //(BOOL)lParam - silently close unsaved empty MDI tab (on\off).
+{$EXTERNALSYM MIS_SILENTCLOSEEMPTYMDI}
+const MIS_DATELOG = 217; //(BOOL)lParam - insert date if file has .LOG at the beginning (on\off).
+{$EXTERNALSYM MIS_DATELOG}
+const MIS_SAVEINREADONLYMSG = 221; //(BOOL)lParam - save in read-only files warning (on\off).
+{$EXTERNALSYM MIS_SAVEINREADONLYMSG}
+const MIS_DEFAULTSAVEEXT = 224; //(wchar_t *)lParam - default saving extension string.
+{$EXTERNALSYM MIS_DEFAULTSAVEEXT}
+const MIS_SEARCHOPTIONS = 228; //(DWORD)lParam - search options, see FRF_* defines.
+{$EXTERNALSYM MIS_SEARCHOPTIONS}
+//Print dialog
+const MIS_PRINTMARGINS = 251; //(RECT *)lParam - print margins.
+{$EXTERNALSYM MIS_PRINTMARGINS}
+const MIS_PRINTCOLOR = 255; //(DWORD)lParam - color printing, see PRNC_* defines.
+{$EXTERNALSYM MIS_PRINTCOLOR}
+const MIS_PRINTHEADERENABLE = 259; //(BOOL)lParam - enable print header (on\off).
+{$EXTERNALSYM MIS_PRINTHEADERENABLE}
+const MIS_PRINTHEADER = 260; //(wchar_t *)lParam - print header string.
+{$EXTERNALSYM MIS_PRINTHEADER}
+const MIS_PRINTFOOTERENABLE = 261; //(BOOL)lParam - enable print footer (on\off).
+{$EXTERNALSYM MIS_PRINTFOOTERENABLE}
+const MIS_PRINTFOOTER = 262; //(wchar_t *)lParam - print footer string.
+{$EXTERNALSYM MIS_PRINTFOOTER}
+const MIS_PRINTFONTENABLE = 266; //(BOOL)lParam - enable print font (on\off).
+{$EXTERNALSYM MIS_PRINTFONTENABLE}
+const MIS_PRINTFONTW = 267; //(LOGFONTW *)lParam - print font data.
+{$EXTERNALSYM MIS_PRINTFONTW}
+//Open dialog
+const MIS_LASTDIR = 281; //(wchar_t *)lParam - last directory of open dialog.
+{$EXTERNALSYM MIS_LASTDIR}
+const MIS_SHOWPLACESBAR = 282; //(BOOL)lParam - show places bar in open dialog (on\off).
+{$EXTERNALSYM MIS_SHOWPLACESBAR}
 
 //AKD_GETFRAMEINFO type. See FRAMEDATA members description.
 const FI_WNDEDITPARENT = 1;
@@ -997,6 +1123,8 @@ const FRF_WHOLEWORD = $00000002;  //Same as AEFR_WHOLEWORD.
 {$EXTERNALSYM FRF_WHOLEWORD}
 const FRF_MATCHCASE = $00000004;  //Same as AEFR_MATCHCASE.
 {$EXTERNALSYM FRF_MATCHCASE}
+const FRF_REGEXPNONEWLINEDOT = $00040000;  //Symbol . specifies any character except new line. Uses with FRF_REGEXP.
+{$EXTERNALSYM FRF_REGEXPNONEWLINEDOT}
 const FRF_REGEXP = $00080000;  //Same as AEFR_REGEXP.
 {$EXTERNALSYM FRF_REGEXP}
 const FRF_UP = $00100000;
@@ -1159,23 +1287,6 @@ const IMENU_EDIT = $00000001;
 const IMENU_CHECKS = $00000004;
 {$EXTERNALSYM IMENU_CHECKS}
 
-//GetWindowLongPtr/SetWindowLongPtr
-const DWLP_MSGRESULT = 0;
-{$EXTERNALSYM DWLP_MSGRESULT}
-// Fr0sT: these constants are already defined in Windows.pas starting from D2009
-{$IF CompilerVersion < 20}
-  const GWLP_WNDPROC = -4;
-  {$EXTERNALSYM GWLP_WNDPROC}
-  const GWLP_HINSTANCE = -6;
-  {$EXTERNALSYM GWLP_HINSTANCE}
-  const GWLP_HWNDPARENT = -8;
-  {$EXTERNALSYM GWLP_HWNDPARENT}
-  const GWLP_ID = -12;
-  {$EXTERNALSYM GWLP_ID}
-  const GWLP_USERDATA = -21;
-  {$EXTERNALSYM GWLP_USERDATA}
-{$IFEND}
-
 ////
 type
   PHWND = ^HWND;
@@ -1336,6 +1447,7 @@ type
     bRunning: BOOL;                 //Function is running.
     PluginProc: TPLUGINPROC;        //Function procedure.
     lpParameter: Pointer;           //Procedure parameter.
+    nRefCount: Integer;             //Internal.
   end;
   TPLUGINFUNCTION = _PLUGINFUNCTION;
   {$EXTERNALSYM _PLUGINFUNCTION}
@@ -1623,11 +1735,13 @@ type
     szFile : array[0..MAX_PATH-1] of AnsiChar;             //Frame cFile (Ansi).
     wszFile : array[0..MAX_PATH-1] of WideChar;            //Frame cFile (Unicode).
     nFileLen : Integer;                                    //Frame cFile length.
+    nStreamOffset: Integer;                                //":" symbol offset in FRAMEDATA.wszFile.
     hIcon : HICON;                                         //Frame icon.
     nIconIndex : Integer;                                  //Frame ImageList icon index.
     rcEditWindow : TRECT;                                  //Edit TRect. rcEditWindow.right - is width and rcEditWindow.bottom is height.
     rcMasterWindow : TRECT;                                //Master window TRect. rcMasterWindow.right - is width and rcMasterWindow.bottom is height.
     //Edit settings (AkelPad)
+    dwLockInherit: DWORD;                                  //See LI_* defines.
     lf : LOGFONTW;                                         //Edit font.
     bTabStopAsSpaces : BOOL;                               //Insert tab stop as spaces.
     dwCaretOptions : DWORD;                                //See CO_* defines.
@@ -1661,19 +1775,19 @@ type
     nBkImageAlpha: Integer;                                  //Alpha transparency value that ranges from 0 to 255.
     hBkImageBitmap: HBITMAP;                             //Background image handle.
     aec : TAECOLORS;                                        //Edit colors.
-    //Edit state internal
+    //Edit state internal. AKD_FRAMEINIT not copy data below.
     lpEditProc : TAEEditProc;                              //Edit window procedure.
     ft : FILETIME;                                         //cFile time.
     dwInputLocale : HKL;                                   //Keyboard layout.
-    dwLockInherit : DWORD;                                 //See LI_* defines.
-    nStreamOffset : Integer;                               //":" symbol offset in FRAMEDATA.wszFile.
-    nCompileErrorOffset : INT_PTR;                         //Contain pattern offset, if error occurred during compile pattern.
     hRecentCaretStack: TSTACKRECENTCARET;                 //Recent caret stack.
     lpCurRecentCaret: PRECENTCARETITEM;                  //Current recent caret position.
-    //Substract selection
+    //Find/Replace
+    nCompileErrorOffset: INT_PTR;                        //Contain pattern offset, if error occurred during compile pattern.
+    bCompileErrorReplace: BOOL;                          //TRUE - error in "ReplaceWith" complitaion, FALSE - error in "FindIt" complitaion.
+  
+    //Statusbar
     crPrevSel : TAECHARRANGE;
     nSelSubtract : INT_PTR;
-    //"StatusUserFormat" variables.
     nCaretRichOffset : INT_PTR;
     nCaretByteOffset : INT_PTR;
     nCaretChar : Integer;
@@ -2977,6 +3091,8 @@ const AKD_SETPRINTINFO = (WM_USER + 192);
 {$EXTERNALSYM AKD_SETPRINTINFO}
 
 //Options
+const AKD_SETMAININFO = (WM_USER + 195);
+{$EXTERNALSYM AKD_SETMAININFO}
 const AKD_SETFRAMEINFO = (WM_USER + 196);
 {$EXTERNALSYM AKD_SETFRAMEINFO}
 const AKD_GETMAININFO = (WM_USER + 198);
@@ -3011,6 +3127,8 @@ const AKD_RECENTFILES = (WM_USER + 214);
 {$EXTERNALSYM AKD_RECENTFILES}
 const AKD_SEARCHHISTORY = (WM_USER + 215);
 {$EXTERNALSYM AKD_SEARCHHISTORY}
+const AKD_SETEDITNOTIFY = (WM_USER + 216);
+{$EXTERNALSYM AKD_SETEDITNOTIFY}
 
 //Windows
 const AKD_GETMODELESS = (WM_USER + 251);
@@ -3027,6 +3145,8 @@ const AKD_SETHOTKEYINPUT = (WM_USER + 256);
 {$EXTERNALSYM AKD_SETHOTKEYINPUT}
 const AKD_DIALOGRESIZE = (WM_USER + 257);
 {$EXTERNALSYM AKD_DIALOGRESIZE}
+const AKD_UPDATESTATUSUSER = (WM_USER + 258);
+{$EXTERNALSYM AKD_UPDATESTATUSUSER}
 
 //Frames
 const AKD_FRAMEACTIVATE = (WM_USER + 261);
@@ -3049,6 +3169,10 @@ const AKD_FRAMEISVALID = (WM_USER + 269);
 {$EXTERNALSYM AKD_FRAMEISVALID}
 const AKD_FRAMEINDEX = (WM_USER + 270);
 {$EXTERNALSYM AKD_FRAMEINDEX}
+const AKD_FRAMEINIT = (WM_USER + 271);
+{$EXTERNALSYM AKD_FRAMEINIT}
+const AKD_FRAMEAPPLYEDIT = (WM_USER + 272);
+{$EXTERNALSYM AKD_FRAMEAPPLYEDIT}
 
 //Thread
 const AKD_GLOBALALLOC = (WM_USER + 281);
@@ -4129,9 +4253,9 @@ Finds text in a edit control.
 
 Return Value
  Character position of the next match.
- If there are no more matches, the return value is вЂ“1.
- If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (вЂ“100 - PatternOffset).
- For example, TEXTFINDW.pFindIt equal to "ab[c", syntax error in third symbol, return value is вЂ“102.
+ If there are no more matches, the return value is -1.
+ If there is syntax error occurred with FRF_REGEXP or FRF_ESCAPESEQ flag, the return value is (100 - PatternOffset).
+ For example, TEXTFINDW.pFindIt equal to "ab[c" with FRF_REGEXP, syntax error in third symbol, return value is 102.
 
 Example (Unicode):
  TEXTFINDW tf;
@@ -4152,9 +4276,9 @@ Replaces text in a edit control.
 
 Return Value
  Character position of the next match.
- If there are no more matches, the return value is вЂ“1.
- If there is syntax error in regular expression (with FRF_REGEXP flag), the return value is (вЂ“100 - PatternOffset).
- For example, TEXTREPLACEW.pFindIt equal to "ab[c", syntax error in third symbol, return value is вЂ“102.
+ If there are no more matches, the return value is -1.
+ If there is syntax error occurred with FRF_REGEXP or FRF_ESCAPESEQ flag, the return value is (100 - PatternOffset).
+ For example, TEXTREPLACEW.pFindIt equal to "ab[c" with FRF_REGEXP, syntax error in third symbol, return value is 102.
 
 Example (Unicode):
  TEXTREPLACEW tr;
@@ -4306,6 +4430,23 @@ Example (get AkelPad directory):
  wchar_t wszAkelDir[MAX_PATH];
 
  SendMessage(pd->hMainWnd, AKD_GETMAININFO, MI_AKELDIRW, (WPARAM)wszAkelDir);
+
+
+AKD_SETMAININFO
+_______________
+
+Set main AkelPad data.
+
+(int)wParam  == see MIS_* defines.
+(void)lParam == depend on wParam.
+
+Return Value
+ TRUE  info changed.
+ FALSE info not changed.
+
+Example:
+ SendMessage(pd->hMainWnd, AKD_SETMAININFO, MIS_SAVESETTINGS, SS_INI);
+
 
 
 AKD_GETFRAMEINFO
@@ -4499,6 +4640,22 @@ Example:
  SendMessage(pd->hMainWnd, AKD_SEARCHHISTORY, SH_GET, 0);
 
 
+AKD_SETEDITNOTIFY
+_________________
+
+Set standard AkelPad's event mask for an edit control.
+
+(HWND)wParam == edit window.
+lParam       == not used.
+
+Return Value
+ Zero.
+
+Example:
+ SendMessage(pd->hMainWnd, AKD_SETEDITNOTIFY, (LPARAM)hWndEdit, 0);
+
+
+
 AKD_GETMODELESS
 _______________
 
@@ -4658,6 +4815,21 @@ BOOL CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 
+AKD_UPDATESTATUSUSER
+____________________
+
+Force update user statusbar.
+
+wParam == not used.
+lParam == not used.
+
+Return Value
+ Zero.
+
+Example:
+ SendMessage(pd->hMainWnd, AKD_UPDATESTATUSUSER, 0, 0);
+
+
 AKD_FRAMEACTIVATE
 _________________
 
@@ -4783,6 +4955,45 @@ Return Value
 
 Example:
  SendMessage(pd->hMainWnd, AKD_FRAMEINDEX, FALSE, (LPARAM)lpFrame);
+
+
+AKD_FRAMEINIT
+_____________
+
+Initialize frame data.
+
+(FRAMEDATA * )wParam == pointer to a source FRAMEDATA structure. If NULL, current frame will be used as source.
+(FRAMEDATA * )lParam == pointer to a target FRAMEDATA structure.
+
+Return Value
+ Zero.
+
+Example:
+ FRAMEDATA *lpFrameTarget;
+
+ if (lpFrameTarget=GlobalAlloc(GPTR, sizeof(FRAMEDATA)))
+ {
+   SendMessage(pd->hMainWnd, AKD_FRAMEINIT, (WPARAM)NULL, (LPARAM)lpFrameTarget);
+   lpFrameTarget->ei.hWndEdit=hWndEdit;
+   lpFrameTarget->ei.hDocEdit=hDocEdit;
+   SendMessage(pd->hMainWnd, AKD_FRAMEAPPLYEDIT, 0, (WPARAM)lpFrameTarget);
+ }
+
+
+AKD_FRAMEAPPLYEDIT
+__________________
+
+Apply frame data to edit window.
+
+wParam              == not used.
+(FRAMEDATA * )lParam == pointer to a FRAMEDATA structure.
+
+Return Value
+ Zero.
+
+Example:
+ See AKD_FRAMEINIT example.
+
 
 
 AKD_GLOBALALLOC
